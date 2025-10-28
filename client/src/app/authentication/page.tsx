@@ -2,7 +2,9 @@
 
 import React, {useState, useEffect} from "react";
 import { Card, Form, Input, Button, Typography } from "antd";
+import Link from "next/link"
 import LoginContent from "@/components/LoginContent";
+import SignupContent from "@/components/SignupContent";
 
 const tabList = [
     {
@@ -18,10 +20,8 @@ const tabList = [
 // might get complicated
 // Look into ts by example on antd
 const tabContentList: Record<string, React.ReactNode> = { // ts is saying this has keys of type string and values of type ReactNode
-    login: 
-    <LoginContent />,
-
-    signup: <p>content2</p>,
+    login: <LoginContent />,
+    signup: <SignupContent />
 };
 
 export default function auth_page() {
@@ -34,12 +34,13 @@ export default function auth_page() {
 
     return (
     <main className="flex min-h-screen flex-col items-center pt-[100px]">
-        <Typography.Title level={1}>Spark! Bytes</Typography.Title>
+        <Link href="../"><Typography.Title level={1}>Spark! Bytes</Typography.Title></Link>
         <Card
         onTabChange={onTabChange}
         tabList={tabList}
         activeTabKey={currentTabKey}
         title="Join us"
+        className="w-[50%]"
         >
             {tabContentList[currentTabKey]}
         </Card>
