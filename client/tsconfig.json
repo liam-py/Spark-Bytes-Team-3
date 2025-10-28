@@ -1,27 +1,42 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
+    // === Target / JS features ===
+    "target": "ES2022", // Modern JS features for both server and browser
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ], // Expose DOM + latest ES libs to the type system
+    // === JSX / React ===
+    "jsx": "preserve", // React 17+ JSX transform (Next.js default)
+    // === Module system / bundling ===
+    "module": "esnext", // Let Next/Vite-style bundlers handle ESM
+    "moduleResolution": "bundler", // Next.js recommended; resolves like modern bundlers
+    "resolveJsonModule": true, // Allow importing JSON as modules
+    "isolatedModules": true, // Each file treated as a separate module (ts->js safety)
+    "noEmit": true, // Do not emit JS; Next handles build output
+    // === Type safety / dev ergonomics ===
+    "strict": true, // Enable all strict type-checking options
+    "skipLibCheck": true, // Speed up builds by skipping .d.ts checks
+    "allowJs": true, // Allow .js in the project (handy during migration)
+    "esModuleInterop": true, // Enables default-import interop (e.g., jsonwebtoken/bcrypt)
+    "forceConsistentCasingInFileNames": true, // Prevent case-mismatch issues across OSes
+    "incremental": true, // Faster subsequent builds with TS cache
+    // === Path aliases (IMPORTANT for "@/lib/*", "@/server/*") ===
+    "baseUrl": ".", // Required when using "paths"; base dir is project root
+    "paths": {
+      "@/*": [
+        "src/*"
+      ] // Map "@/..." to "client/src/..."
+    },
+    // === Next.js plugin ===
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ] // Next-specific TS behavior/intellisense
   },
+  // Files that participate in type checking
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -30,5 +45,8 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  // Exclude heavy or irrelevant dirs
+  "exclude": [
+    "node_modules"
+  ]
 }
