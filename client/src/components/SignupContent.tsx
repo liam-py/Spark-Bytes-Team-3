@@ -3,6 +3,8 @@
 import React from "react";
 import { Typography, Form, Input, Button, message } from "antd";
 
+const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+
 /**
  * SignupContent
  * - CHANGE: Remove local useState; rely on AntD Form state.
@@ -15,21 +17,20 @@ export default function SignupContent() {
   const [form] = Form.useForm();
 
   // CHANGE: onFinish collects validated values from the form
-  const onFinish = async (values: { email: string; password: string; name?: string }) => {
+  const onFinish = async (values: { name?: string; email: string; password: string }) => {
     try {
-      const res = await fetch("/api/users", {
+      const res = await fetch(`${base}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values), // { email, password, name? }
+        credentials: "include",                   
+        body: JSON.stringify(values),
       });
       const data = await res.json();
-      if (!res.ok) {
-        // Backend may return { error: "Email already registered" } or similar
-        return message.error(data?.error || "Sign up failed");
-      }
-      message.success("Account created. Please log in.");
-      form.resetFields(); // CHANGE: clear inputs after success
-    } catch (e) {
+      if (!res.ok) return message.error(data?.error || "Sign up failed");
+      message.success(`Account created: ${data.email || values.email}`);
+      // after sign up jump to other pages
+      // window.location.href = "/authentication";
+    } catch {
       message.error("Network error");
     }
   };
