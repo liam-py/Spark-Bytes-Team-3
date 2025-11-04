@@ -3,6 +3,7 @@
 import React from "react";
 import { Typography, Form, Input, Button, message } from "antd";
 
+const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 /**
  * LoginContent
  * - CHANGE: Remove local useState and let AntD Form manage field values/validation.
@@ -16,24 +17,23 @@ export default function LoginContent() {
 
   // CHANGE: onFinish now receives validated values from AntD Form
   const onFinish = async (values: { email: string; password: string }) => {
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values), // { email, password }
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        // CHANGE: show backend error or generic message
-        return message.error(data?.error || "Login failed");
-      }
-      message.success(`Welcome back: ${data.user?.email || values.email}`);
-      // Optional redirect after login:
-      // window.location.href = "/";
-    } catch (e) {
-      message.error("Network error");
-    }
-  };
+  try {
+    const res = await fetch(`${base}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",                    // 让浏览器收/带 sb_session
+      body: JSON.stringify(values),
+    });
+    const data = await res.json();
+    if (!res.ok) return message.error(data?.error || "Login failed");
+    message.success(`Welcome back: ${data.user?.email || values.email}`);
+    // after sucess login
+    // window.location.href = "/authentication";
+  } catch {
+    message.error("Network error");
+  }
+
+};
 
   return (
     <div>
