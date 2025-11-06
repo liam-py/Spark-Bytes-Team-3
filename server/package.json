@@ -3,17 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "private": true,
-
-
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "prisma:gen": "prisma generate",
-    "prisma:migrate": "prisma migrate dev -n init"
+    "prisma:migrate": "prisma migrate dev"
   },
-
-
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,7 +20,10 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "google-auth-library": "^10.5.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.16.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -32,7 +31,9 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^1.4.11",
     "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.6",
     "prisma": "^6.18.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"

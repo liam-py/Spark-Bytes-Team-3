@@ -1,11 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,10 +10,99 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  STUDENT
+  ORGANIZER
+  ADMIN
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  passwordHash String
-  createdAt    DateTime @default(now())
+  id                String       @id @default(cuid())
+  email             String       @unique
+  name              String?
+  buId              String?
+  passwordHash      String
+  role              UserRole     @default(STUDENT)
+  isVerified        Boolean      @default(false)
+  isOrganizer       Boolean      @default(false)
+  notificationEnabled Boolean    @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  // Relations
+  events            Event[]
+  reservations     Reservation[]
+  feedbacks        Feedback[]
+  dietaryPrefs     DietaryPrefs?
+}
+
+model DietaryPrefs {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isVegan           Boolean  @default(false)
+  isVegetarian      Boolean  @default(false)
+  isHalal           Boolean  @default(false)
+  isKosher          Boolean  @default(false)
+  allergies         String[]
+  otherRestrictions String?
+}
+
+model Event {
+  id                String   @id @default(cuid())
+  title             String
+  description       String?
+  location          String
+  startTime         DateTime
+  endTime           DateTime
+  imagePath         String?
+  createdBy         String
+  creator           User     @relation(fields: [createdBy], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  foodItems         FoodItem[]
+  reservations     Reservation[]
+  feedbacks        Feedback[]
+}
+
+model FoodItem {
+  id                String   @id @default(cuid())
+  eventId           String
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  quantity          Int
+  reserved          Int      @default(0)
+  dietaryInfo       String[]
+}
+
+model Reservation {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+  eventId           String
+  event             Event             @relation(fields: [eventId], references: [id])
+  foodItemId        String?
+  quantity          Int               @default(1)
+  status            ReservationStatus @default(ACTIVE)
+  reservedAt        DateTime          @default(now())
+}
+
+model Feedback {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  eventId           String
+  event             Event    @relation(fields: [eventId], references: [id])
+  rating            Int
+  comment           String?
+  createdAt         DateTime @default(now())
 }

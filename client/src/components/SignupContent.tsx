@@ -1,75 +1,138 @@
 "use client";
 
-import React from "react";
-import { Typography, Form, Input, Button, message } from "antd";
+import React, { useState } from "react";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Alert,
+  Snackbar,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
-/**
- * SignupContent
- * - CHANGE: Remove local useState; rely on AntD Form state.
- * - CHANGE: Add "name" to Form.Item (email/password/name) for value collection.
- * - CHANGE: Use Input.Password for secure password input.
- * - CHANGE: Call /api/users (signup) in onFinish and show success toast.
- * - CHANGE: Reset form after successful signup.
- */
 export default function SignupContent() {
-  const [form] = Form.useForm();
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // CHANGE: onFinish collects validated values from the form
-  const onFinish = async (values: { name?: string; email: string; password: string }) => {
+  const validateBUEmail = (email: string) => {
+    return email.endsWith("@bu.edu");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!validateBUEmail(email)) {
+      setError("Only BU email addresses (@bu.edu) are allowed");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const res = await fetch(`${base}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",                   
-        body: JSON.stringify(values),
+        credentials: "include",
+        body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
-      if (!res.ok) return message.error(data?.error || "Sign up failed");
-      message.success(`Account created: ${data.email || values.email}`);
-      // after sign up jump to other pages
-      // window.location.href = "/authentication";
+      if (!res.ok) {
+        setError(data?.error || "Sign up failed");
+        setLoading(false);
+        return;
+      }
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     } catch {
-      message.error("Network error");
+      setError("Network error");
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <Typography.Text>Create a new account</Typography.Text>
+    <Box>
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        Create a new account
+      </Typography>
 
-      {/* CHANGE: add layout + bind form + onFinish */}
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        {/* Optional display name (you can remove this block if not needed) */}
-        <Form.Item name="name" label="Name">
-          <Input placeholder="your name (optional)" />
-        </Form.Item>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          fullWidth
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          margin="normal"
+          placeholder="your name (optional)"
+        />
 
-        {/* CHANGE: add "name" with email validation */}
-        <Form.Item
-          name="email"
+        <TextField
+          fullWidth
           label="Email"
-          rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
-        >
-          <Input placeholder="email" />
-        </Form.Item>
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          margin="normal"
+          placeholder="email@bu.edu"
+          error={!!email && !validateBUEmail(email)}
+          helperText={
+            email && !validateBUEmail(email)
+              ? "Only BU email addresses (@bu.edu) are allowed"
+              : ""
+          }
+        />
 
-        {/* CHANGE: use Input.Password and min length rule */}
-        <Form.Item
-          name="password"
+        <TextField
+          fullWidth
           label="Password"
-          rules={[{ required: true, min: 6, message: "Please enter a password (≥ 6 chars)" }]}
-        >
-          <Input.Password placeholder="password (≥ 6 chars)" />
-        </Form.Item>
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          margin="normal"
+          placeholder="password (≥ 6 chars)"
+          inputProps={{ minLength: 6 }}
+        />
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Sign up
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2 }}
+          disabled={loading}
+        >
+          {loading ? "Signing up..." : "Sign up"}
+        </Button>
+      </form>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+      >
+        <Alert severity="error" onClose={() => setError("")}>
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={2000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert severity="success">Account created! Redirecting...</Alert>
+      </Snackbar>
+    </Box>
   );
 }

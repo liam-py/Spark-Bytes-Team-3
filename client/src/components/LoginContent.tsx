@@ -1,71 +1,210 @@
 "use client";
 
-import React from "react";
-import { Typography, Form, Input, Button, message } from "antd";
+import React, { useState } from "react";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Alert,
+  Snackbar,
+  Divider,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
-/**
- * LoginContent
- * - CHANGE: Remove local useState and let AntD Form manage field values/validation.
- * - CHANGE: Add "name" to Form.Item so AntD can collect values.
- * - CHANGE: Use Input.Password for masking.
- * - CHANGE: Wire up /api/auth/login with fetch in onFinish.
- * - CHANGE: Add basic success/error toasts.
- */
-export default function LoginContent() {
-  const [form] = Form.useForm();
 
-  // CHANGE: onFinish now receives validated values from AntD Form
-  const onFinish = async (values: { email: string; password: string }) => {
-  try {
-    const res = await fetch(`${base}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",                    // 让浏览器收/带 sb_session
-      body: JSON.stringify(values),
-    });
-    const data = await res.json();
-    if (!res.ok) return message.error(data?.error || "Login failed");
-    message.success(`Welcome back: ${data.user?.email || values.email}`);
-    // after sucess login
-    // window.location.href = "/authentication";
-  } catch {
-    message.error("Network error");
-  }
+export default function LoginContent({ userType = "student" }: { userType?: "student" | "admin" }) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${base}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+      
+      // For student login, reject admins
+      if (userType === "student" && data.user?.role === "ADMIN") {
+        setError("Please use the admin login page for admin access.");
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        // Redirect based on role
+        if (data.user?.role === "ADMIN") {
+          router.push("/admin/analytics");
+        } else {
+          router.push("/");
+        }
+      }, 1000);
+    } catch {
+      setError("Network error");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (codeResponse: any) => {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      // The redirect URI must match exactly what's in Google Cloud Console
+      // For @react-oauth/google with auth-code flow, it uses the current origin
+      const redirectUri = window.location.origin;
+      
+      console.log('Google OAuth response:', {
+        hasCode: !!codeResponse.code,
+        redirectUri,
+        fullResponse: codeResponse
+      });
+      
+      const res = await fetch(`${base}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ 
+          code: codeResponse.code, 
+          redirectUri: redirectUri 
+        }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Google OAuth error response:', data);
+        setError(data?.error || "Google sign-in failed");
+        setGoogleLoading(false);
+        return;
+      }
+
+      // For student login, reject admins
+      if (userType === "student" && data.user?.role === "ADMIN") {
+        setError("Please use the admin login page for admin access.");
+        setGoogleLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        if (data.user?.role === "ADMIN") {
+          router.push("/admin/analytics");
+        } else {
+          router.push("/");
+        }
+      }, 1000);
+    } catch (err: any) {
+      console.error('Google OAuth network error:', err);
+      setError("Network error during Google sign-in: " + (err.message || "Unknown error"));
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = (error: any) => {
+    console.error('Google OAuth error:', error);
+    setError("Google sign-in was cancelled or failed");
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: handleGoogleError,
+    flow: "auth-code",
+  });
 
   return (
-    <div>
-      <Typography.Text>Enter existing email and password</Typography.Text>
+    <Box>
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        Enter existing email and password
+      </Typography>
 
-      {/* CHANGE: add layout + bind form + onFinish */}
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        {/* CHANGE: add "name" so AntD can track and validate the field */}
-        <Form.Item
-          name="email"
+      <form onSubmit={handleSubmit}>
+        <TextField
+          fullWidth
           label="Email"
-          rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
-        >
-          {/* CHANGE: controlled by Form, no local useState */}
-          <Input placeholder="email" />
-        </Form.Item>
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          margin="normal"
+          placeholder="email@bu.edu"
+        />
 
-        {/* CHANGE: use Input.Password and add min length validation */}
-        <Form.Item
-          name="password"
+        <TextField
+          fullWidth
           label="Password"
-          rules={[{ required: true, min: 6, message: "Please enter a password (≥ 6 chars)" }]}
-        >
-          <Input.Password placeholder="password" />
-        </Form.Item>
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          margin="normal"
+          placeholder="password"
+          inputProps={{ minLength: 6 }}
+        />
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Log in
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2 }}
+          disabled={loading || googleLoading}
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </Button>
+      </form>
+
+      <Divider sx={{ my: 3 }}>OR</Divider>
+
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => googleLogin()}
+        disabled={loading || googleLoading}
+        sx={{ 
+          mb: 2,
+          textTransform: "none",
+        }}
+      >
+        {googleLoading ? "Signing in..." : "Sign in with Google"}
+      </Button>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+      >
+        <Alert severity="error" onClose={() => setError("")}>
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={2000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert severity="success">Login successful! Redirecting...</Alert>
+      </Snackbar>
+    </Box>
   );
 }

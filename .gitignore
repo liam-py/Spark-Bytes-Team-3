@@ -95,6 +95,9 @@ coverage.xml
 *.sqlite
 *.sqlite3
 
+# Uploads
+server/uploads/
+
 # OS-specific
 # Windows
 Thumbs.db

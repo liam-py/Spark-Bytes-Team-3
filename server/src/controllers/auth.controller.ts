@@ -1,41 +1,101 @@
 import { Request, Response } from 'express'
 import { userService } from '../services/user.service'
-import jwt from 'jsonwebtoken'
+import { registerSchema, loginSchema } from '../validators/user.validator'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
 const COOKIE_NAME = 'sb_session'
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
 export const authController = {
   register: async (req: Request, res: Response) => {
     try {
-      const { email, password, name } = req.body
+      const validated = registerSchema.parse(req.body)
+      const { email, password, name } = validated
       const user = await userService.signup(email, password, name)
       res.status(201).json(user)
     } catch (e: any) {
-      if (e?.message === 'EMAIL_TAKEN') return res.status(409).json({ error: 'Email already registered' })
+      if (e?.message === 'EMAIL_TAKEN' || e?.message === 'INVALID_EMAIL') {
+        return res.status(400).json({
+          error: e.message === 'INVALID_EMAIL' 
+            ? 'Only BU email addresses (@bu.edu) are allowed'
+            : 'Email already registered',
+        })
+      }
+      if (e.name === 'ZodError') {
+        return res.status(400).json({ error: e.errors[0].message })
+      }
       res.status(400).json({ error: 'Invalid request' })
     }
   },
 
   login: async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body
+      const validated = loginSchema.parse(req.body)
+      const { email, password } = validated
       const { token, user } = await userService.login(email, password)
       res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         sameSite: 'lax',
-        secure: false, // 部署到 HTTPS 改 true
+        secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       })
       res.status(200).json({ ok: true, user })
-    } catch {
+    } catch (e: any) {
+      if (e.name === 'ZodError') {
+        return res.status(400).json({ error: e.errors[0].message })
+      }
       res.status(401).json({ error: 'Invalid credentials' })
+    }
+  },
+
+  googleOAuth: async (req: Request, res: Response) => {
+    try {
+      const { code, redirectUri } = req.body
+      if (!code) {
+        return res.status(400).json({ error: 'Authorization code is required' })
+      }
+
+      const finalRedirectUri = redirectUri || CORS_ORIGIN
+      console.log('Google OAuth request:', { 
+        hasCode: !!code, 
+        redirectUri: finalRedirectUri,
+        clientId: process.env.GOOGLE_CLIENT_ID?.substring(0, 20) + '...'
+      })
+
+      const { token, user } = await userService.loginWithGoogle(code, finalRedirectUri)
+      
+      res.cookie(COOKIE_NAME, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      })
+      
+      res.status(200).json({ ok: true, user })
+    } catch (e: any) {
+      console.error('Google OAuth controller error:', e.message)
+      if (e?.message === 'INVALID_EMAIL') {
+        return res.status(400).json({ 
+          error: 'Only BU email addresses (@bu.edu) are allowed for Google sign-in' 
+        })
+      }
+      if (e?.message === 'REDIRECT_URI_MISMATCH') {
+        return res.status(400).json({ 
+          error: 'Redirect URI mismatch. Please check Google Cloud Console settings.' 
+        })
+      }
+      if (e?.message === 'INVALID_TOKEN' || e?.message === 'Google OAuth not configured') {
+        return res.status(400).json({ error: e.message })
+      }
+      res.status(401).json({ error: 'Google authentication failed: ' + (e.message || 'Unknown error') })
     }
   },
 
   me: async (req: Request, res: Response) => {
     try {
+      const jwt = require('jsonwebtoken')
+      const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
       const token = req.cookies?.[COOKIE_NAME]
       if (!token) return res.json({ user: null })
       const { userId } = jwt.verify(token, JWT_SECRET) as any
