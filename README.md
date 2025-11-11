@@ -119,6 +119,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 2. Run database migrations:
 ```bash
 cd server
+npm install dotenv
 npm run prisma:migrate
 ```
 

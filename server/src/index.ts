@@ -12,6 +12,15 @@ import dietaryRoutes from './routes/dietary.routes'
 import feedbackRoutes from './routes/feedback.routes'
 import notificationRoutes from './routes/notification.routes'
 import analyticsRoutes from './routes/analytics.routes'
+import dotenv from 'dotenv'
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+console.log(process.env.DATABASE_URL)
+console.log(process.env.JWT_SECRET)
+console.log(process.env.PORT)
+console.log(process.env.CORS_ORIGIN)
+console.log(process.env.GOOGLE_CLIENT_ID)
+console.log(process.env.GOOGLE_CLIENT_SECRET)
 
 const app = express()
 const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
