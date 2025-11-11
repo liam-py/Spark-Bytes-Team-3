@@ -4,7 +4,6 @@
     // File Layout
     // "rootDir": "./src",
     // "outDir": "./dist",
-
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "target": "ES2020",
@@ -13,8 +12,6 @@
     // "lib": ["esnext"],
     // "types": ["node"],
     // and npm install -D @types/node
-
-
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
@@ -22,7 +19,6 @@
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
-
     // Recommended Options
     "moduleResolution": "node",
     "verbatimModuleSyntax": false,
@@ -32,5 +28,8 @@
     "outDir": "dist",
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "lib"
+  ]
 }

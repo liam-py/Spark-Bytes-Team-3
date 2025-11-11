@@ -8,7 +8,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     // Redirect to student login page
-    router.push("/login");
+    router.push("login");
   }, [router]);
 
   return null;
