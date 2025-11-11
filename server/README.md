@@ -47,7 +47,7 @@ npm install
 2. Set up environment variables:
 Create a `.env` file in the root of the `server` directory:
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
+DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require&connect_timeout=10&pool_timeout=10&pgbouncer=true"
 JWT_SECRET="your-secret-key-here-change-in-production"
 PORT=4000
 CORS_ORIGIN="http://localhost:3000"
@@ -55,11 +55,57 @@ GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
 
-**Note**: 
-- Get your Supabase connection string from your Supabase project (Settings > Database > Connection string - use Session Pooler for IPv4 compatibility)
+**Important Connection Notes**: 
+- Get your Supabase connection string from your Supabase project (Settings > Database > Connection string)
+- **For Session Pooler (recommended)**: Use port `6543` and add `&pgbouncer=true` parameter
+- **For Direct Connection**: Use port `5432` (better for migrations, but may have connection limits)
+- **Connection Parameters**:
+  - `connect_timeout=10` - Timeout for establishing connection (seconds) - **prevents hanging**
+  - `pool_timeout=10` - Timeout for getting connection from pool - **prevents hanging**
+  - `pgbouncer=true` - Required when using Supabase Session Pooler (disables prepared statements)
 - Get Google OAuth credentials from [Google Cloud Console](https://console.cloud.google.com/) (APIs & Services > Credentials)
 
-3. Initialize the database:
+**Troubleshooting Connection Issues**:
+If Prisma commands (`prisma migrate dev`, `prisma db pull`) hang or timeout:
+
+1. **Check if database is paused** (free tier Supabase pauses after 1 week of inactivity):
+   - Go to Supabase Dashboard
+   - Resume the database if paused
+
+2. **Test connection**:
+   ```bash
+   npm run test:db
+   ```
+
+3. **Try direct connection** instead of pooler:
+   - Change port from `6543` (pooler) to `5432` (direct)
+   - Remove `pgbouncer=true` parameter
+   - Use direct connection string from Supabase Dashboard
+
+4. **Verify timeout parameters are present**:
+   - Ensure `connect_timeout=10&pool_timeout=10` are in your DATABASE_URL
+
+5. **Check network/firewall**:
+   - Some networks block database connections
+   - Try from a different network (mobile hotspot)
+
+**Connection String Examples**:
+```env
+# Session Pooler (Port 6543) - Recommended for production
+DATABASE_URL="postgresql://user:pass@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&connect_timeout=10&pool_timeout=10&pgbouncer=true"
+
+# Direct Connection (Port 5432) - Better for migrations
+DATABASE_URL="postgresql://user:pass@aws-1-us-east-1.connect.psdb.cloud:5432/postgres?sslmode=require&connect_timeout=10"
+```
+
+3. Test the database connection:
+```bash
+npm run test:connection
+```
+
+This will verify that your DATABASE_URL is correct and the database is accessible.
+
+4. Initialize the database:
 ```bash
 npm run prisma:gen
 npm run prisma:migrate
@@ -68,6 +114,31 @@ npm run prisma:migrate
 This will:
 - Generate the Prisma client
 - Create and run migrations to set up the database schema in Supabase
+
+### Troubleshooting Connection Issues
+
+If Prisma commands hang or timeout:
+
+1. **Check if database is paused**: 
+   - Go to Supabase Dashboard → Your Project
+   - If paused, click "Resume" or "Restore"
+
+2. **Test connection**:
+   ```bash
+   npm run test:connection
+   ```
+
+3. **Try direct connection for migrations**:
+   - Use the direct connection string (port 5432) instead of pooler (port 6543)
+   - Update your `.env` DATABASE_URL temporarily for migrations
+   - Switch back to pooler (port 6543) for runtime
+
+4. **Add timeout parameters**:
+   - Ensure your DATABASE_URL includes: `&connect_timeout=10&pool_timeout=10`
+
+5. **Check network/firewall**:
+   - Ensure your network allows outbound connections to Supabase
+   - Try from a different network if on corporate/school network
 
 ### Development
 

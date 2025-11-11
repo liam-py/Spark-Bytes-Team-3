@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import path from 'path'
+import { connectDatabase } from './lib/db'
 import authRoutes from './routes/auth.routes'
 import organizerRoutes from './routes/organizer.routes'
 import eventRoutes from './routes/event.routes'
@@ -33,4 +34,21 @@ app.use('/api/notifications', notificationRoutes)
 app.use('/api/analytics', analyticsRoutes)
 
 const port = process.env.PORT || 4000
-app.listen(port, () => console.log(`API listening on :${port}`))
+
+// Start server with database connection
+async function startServer() {
+  try {
+    // Connect to database first
+    await connectDatabase()
+    
+    // Start Express server
+    app.listen(port, () => {
+      console.log(`API listening on :${port}`)
+    })
+  } catch (error) {
+    console.error('Failed to start server:', error)
+    process.exit(1)
+  }
+}
+
+startServer()

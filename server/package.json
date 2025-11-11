@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "prisma:gen": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test:db": "ts-node scripts/test-connection.ts",
+    "test:connection": "ts-node scripts/test-connection.ts"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +37,7 @@
     "@types/node": "^24.10.0",
     "@types/pg": "^8.15.6",
     "prisma": "^6.18.0",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
