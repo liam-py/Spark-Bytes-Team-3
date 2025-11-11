@@ -31,17 +31,34 @@ export async function connectDatabase() {
 }
 
 // Handle graceful shutdown
+let isShuttingDown = false
+
 const cleanup = async () => {
-  if (isConnected) {
+  if (isShuttingDown || !isConnected) return
+  isShuttingDown = true
+  
+  try {
     await prisma.$disconnect()
     isConnected = false
     console.log('Database disconnected')
+  } catch (error: any) {
+    console.error('Error disconnecting database:', error.message)
   }
 }
 
-process.on('beforeExit', cleanup)
-process.on('SIGINT', cleanup)
-process.on('SIGTERM', cleanup)
+// Only handle actual shutdown signals, not beforeExit (which can fire unexpectedly)
+process.on('SIGINT', async () => {
+  await cleanup()
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  await cleanup()
+  process.exit(0)
+})
+
+// Export cleanup function for explicit cleanup if needed
+export { cleanup as disconnectDatabase }
 
 // Export connection status check
 export function isDatabaseConnected() {
