@@ -1,7 +1,14 @@
+// Load environment variables FIRST (before ANY other imports)
+import dotenv from 'dotenv'
+import path from 'path'
+
+// Configure dotenv to load .env file from server directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
+
+// Now import everything else (environment variables are now available)
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import path from 'path'
 import { connectDatabase } from './lib/db'
 import authRoutes from './routes/auth.routes'
 import organizerRoutes from './routes/organizer.routes'
@@ -12,15 +19,6 @@ import dietaryRoutes from './routes/dietary.routes'
 import feedbackRoutes from './routes/feedback.routes'
 import notificationRoutes from './routes/notification.routes'
 import analyticsRoutes from './routes/analytics.routes'
-import dotenv from 'dotenv'
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') })
-console.log(process.env.DATABASE_URL)
-console.log(process.env.JWT_SECRET)
-console.log(process.env.PORT)
-console.log(process.env.CORS_ORIGIN)
-console.log(process.env.GOOGLE_CLIENT_ID)
-console.log(process.env.GOOGLE_CLIENT_SECRET)
 
 const app = express()
 const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
