@@ -4,13 +4,20 @@ import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
-const googleClient = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET 
-  ? new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, CORS_ORIGIN) 
-  : null
+// Lazy-load Google OAuth client (reads env vars when needed, not at module load)
+// This ensures environment variables are available even if module loads before dotenv
+function getGoogleClient(): OAuth2Client | null {
+  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
+  
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return null
+  }
+  
+  return new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, CORS_ORIGIN)
+}
 
 export const userService = {
   async signup(email: string, password: string, name?: string) {
@@ -53,9 +60,13 @@ export const userService = {
   },
 
   async loginWithGoogle(code: string, redirectUri?: string) {
+    const googleClient = getGoogleClient()  // Read env vars here, not at module load
+    
     if (!googleClient) {
       throw new Error('Google OAuth not configured')
     }
+
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID  // Read here for use below
 
     try {
       // Use the provided redirectUri or default to CORS_ORIGIN
