@@ -54,21 +54,44 @@ export const authController = {
   },
 
   googleOAuth: async (req: Request, res: Response) => {
+    console.log('\n🔵 ===== CONTROLLER: googleOAuth() called =====')
     try {
       const { code, redirectUri } = req.body
       if (!code) {
         return res.status(400).json({ error: 'Authorization code is required' })
       }
 
+      // Reload dotenv to ensure variables are available (handles module caching)
+      const envPath = path.resolve(__dirname, '../../.env')
+      console.log('🔵 Controller - Reloading dotenv from:', envPath)
+      const dotenvResult = dotenv.config({ path: envPath })
+      console.log('🔵 Controller - dotenv.config result:', {
+        error: dotenvResult.error?.message || 'none',
+        parsed: dotenvResult.parsed ? Object.keys(dotenvResult.parsed).length + ' keys' : 'none'
+      })
+
       const finalRedirectUri = redirectUri || CORS_ORIGIN
-      const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID  // Read at runtime
-      console.log('Google OAuth request:', { 
+      
+      // Check environment variables BEFORE and AFTER reload
+      console.log('🔵 Controller - Before reading GOOGLE_CLIENT_ID:')
+      console.log('   GOOGLE keys in process.env:', Object.keys(process.env).filter(k => k.includes('GOOGLE')))
+      
+      const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+      const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
+      
+      console.log('🔵 Controller - After reading variables:')
+      console.log('   GOOGLE_CLIENT_ID:', GOOGLE_CLIENT_ID ? `Found (${GOOGLE_CLIENT_ID.length} chars)` : '❌ MISSING')
+      console.log('   GOOGLE_CLIENT_SECRET:', GOOGLE_CLIENT_SECRET ? `Found (${GOOGLE_CLIENT_SECRET.length} chars)` : '❌ MISSING')
+      
+      console.log('🔵 Controller - Google OAuth request:', { 
         hasCode: !!code, 
         redirectUri: finalRedirectUri,
         clientId: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.substring(0, 20) + '...' : 'undefined'
       })
 
+      console.log('🔵 Controller - Calling userService.loginWithGoogle()...')
       const { token, user } = await userService.loginWithGoogle(code, finalRedirectUri)
+      console.log('🔵 Controller - userService.loginWithGoogle() succeeded!')
       
       res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
@@ -80,7 +103,10 @@ export const authController = {
       
       res.status(200).json({ ok: true, user })
     } catch (e: any) {
-      console.error('Google OAuth controller error:', e.message)
+      console.error('\n🔴 ===== CONTROLLER ERROR =====')
+      console.error('🔴 Error message:', e.message)
+      console.error('🔴 Error stack:', e.stack?.substring(0, 500))
+      console.error('🔴 ============================\n')
       if (e?.message === 'INVALID_EMAIL') {
         return res.status(400).json({ 
           error: 'Only BU email addresses (@bu.edu) are allowed for Google sign-in' 

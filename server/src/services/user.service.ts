@@ -14,23 +14,46 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 // Lazy-load Google OAuth client (reads env vars when needed, not at module load)
 // This ensures environment variables are available even if module loads before dotenv
 function getGoogleClient(): OAuth2Client | null {
+  console.log('\n🟢 ===== getGoogleClient() called =====')
+  
   // Ensure dotenv is loaded (safety check - reloads in case of module caching)
-  dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+  const envPath = path.resolve(__dirname, '../../.env')
+  console.log('🟢 getGoogleClient - Loading .env from:', envPath)
+  
+  const dotenvResult = dotenv.config({ path: envPath })
+  console.log('🟢 getGoogleClient - dotenv.config result:', {
+    error: dotenvResult.error?.message || 'none',
+    parsed: dotenvResult.parsed ? Object.keys(dotenvResult.parsed).length + ' keys parsed' : 'none'
+  })
+  
+  // Check what's in process.env BEFORE reading
+  const googleKeysBefore = Object.keys(process.env).filter(k => k.includes('GOOGLE'))
+  console.log('🟢 getGoogleClient - GOOGLE keys in process.env:', googleKeysBefore)
   
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
   const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
   
+  console.log('🟢 getGoogleClient - Reading variables:')
+  console.log('   GOOGLE_CLIENT_ID:', GOOGLE_CLIENT_ID ? `✅ Found (${GOOGLE_CLIENT_ID.length} chars, starts with: ${GOOGLE_CLIENT_ID.substring(0, 10)}...)` : '❌ MISSING')
+  console.log('   GOOGLE_CLIENT_SECRET:', GOOGLE_CLIENT_SECRET ? `✅ Found (${GOOGLE_CLIENT_SECRET.length} chars, starts with: ${GOOGLE_CLIENT_SECRET.substring(0, 10)}...)` : '❌ MISSING')
+  
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    // Debug logging to help diagnose issues
-    console.error('getGoogleClient - Missing environment variables:', {
-      hasClientId: !!GOOGLE_CLIENT_ID,
-      hasClientSecret: !!GOOGLE_CLIENT_SECRET,
-      googleEnvKeys: Object.keys(process.env).filter(k => k.includes('GOOGLE'))
-    })
+    console.error('\n🔴 ===== getGoogleClient ERROR =====')
+    console.error('🔴 Missing environment variables!')
+    console.error('   GOOGLE_CLIENT_ID:', GOOGLE_CLIENT_ID ? 'Found' : '❌ MISSING')
+    console.error('   GOOGLE_CLIENT_SECRET:', GOOGLE_CLIENT_SECRET ? 'Found' : '❌ MISSING')
+    console.error('   All GOOGLE keys in process.env:', Object.keys(process.env).filter(k => k.includes('GOOGLE')))
+    console.error('   Total env vars:', Object.keys(process.env).length)
+    console.error('🔴 ===================================\n')
     return null
   }
   
-  return new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, CORS_ORIGIN)
+  console.log('🟢 getGoogleClient - Creating OAuth2Client...')
+  const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, CORS_ORIGIN)
+  console.log('🟢 getGoogleClient - ✅ OAuth2Client created successfully!')
+  console.log('🟢 ======================================\n')
+  
+  return client
 }
 
 export const userService = {
@@ -74,13 +97,27 @@ export const userService = {
   },
 
   async loginWithGoogle(code: string, redirectUri?: string) {
+    console.log('\n🟡 ===== loginWithGoogle() called =====')
+    console.log('🟡 Parameters:', { 
+      hasCode: !!code, 
+      codeLength: code?.length || 0,
+      redirectUri: redirectUri || 'not provided'
+    })
+    
+    console.log('🟡 Calling getGoogleClient()...')
     const googleClient = getGoogleClient()  // Read env vars here, not at module load
     
     if (!googleClient) {
+      console.error('🟡 ❌ getGoogleClient() returned null - throwing error')
       throw new Error('Google OAuth not configured')
     }
-
+    
+    console.log('🟡 ✅ getGoogleClient() returned OAuth2Client successfully')
+    
+    // Reload dotenv again before reading for use in the function
+    dotenv.config({ path: path.resolve(__dirname, '../../.env') })
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID  // Read here for use below
+    console.log('🟡 GOOGLE_CLIENT_ID for verification:', GOOGLE_CLIENT_ID ? `Found (${GOOGLE_CLIENT_ID.length} chars)` : '❌ MISSING')
 
     try {
       // Use the provided redirectUri or default to CORS_ORIGIN
