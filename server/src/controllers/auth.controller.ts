@@ -1,3 +1,8 @@
+// Load environment variables (in case module was cached before dotenv loaded)
+import dotenv from 'dotenv'
+import path from 'path'
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+
 import { Request, Response } from 'express'
 import { userService } from '../services/user.service'
 import { registerSchema, loginSchema } from '../validators/user.validator'
@@ -56,10 +61,11 @@ export const authController = {
       }
 
       const finalRedirectUri = redirectUri || CORS_ORIGIN
+      const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID  // Read at runtime
       console.log('Google OAuth request:', { 
         hasCode: !!code, 
         redirectUri: finalRedirectUri,
-        clientId: process.env.GOOGLE_CLIENT_ID?.substring(0, 20) + '...'
+        clientId: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.substring(0, 20) + '...' : 'undefined'
       })
 
       const { token, user } = await userService.loginWithGoogle(code, finalRedirectUri)
