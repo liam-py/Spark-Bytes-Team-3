@@ -54,6 +54,7 @@ export const authController = {
   },
 
   googleOAuth: async (req: Request, res: Response) => {
+    console.log('🚨🚨🚨 CONTROLLER FUNCTION CALLED - FIRST LINE 🚨🚨🚨')
     console.log('\n🔵 ===== CONTROLLER: googleOAuth() called =====')
     try {
       const { code, redirectUri } = req.body
