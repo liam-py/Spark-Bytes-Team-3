@@ -25,6 +25,23 @@ const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
 app.use(cors({ origin, credentials: true }))
 app.use(express.json())
+
+// Add global request logger - catches ALL requests before routes
+// This helps debug if requests are reaching Express at all
+app.use((req, res, next) => {
+  if (req.path === '/auth/google' && req.method === 'POST') {
+    console.log('\n🌍 ===== GLOBAL MIDDLEWARE: Request received =====')
+    console.log('🌍 Method:', req.method)
+    console.log('🌍 Path:', req.path)
+    console.log('🌍 Full URL:', req.url)
+    console.log('🌍 Body keys:', Object.keys(req.body || {}))
+    console.log('🌍 Has code:', !!req.body?.code)
+    console.log('🌍 Code length:', req.body?.code?.length || 0)
+    console.log('🌍 ================================================\n')
+  }
+  next()
+})
+
 app.use(cookieParser())
 
 // Serve static files from uploads directory
