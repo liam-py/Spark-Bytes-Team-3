@@ -1,3 +1,8 @@
+// Load environment variables (in case module was cached before dotenv loaded)
+import dotenv from 'dotenv'
+import path from 'path'
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+
 import { userRepo } from '../repositories/user.repo'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
@@ -9,10 +14,19 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 // Lazy-load Google OAuth client (reads env vars when needed, not at module load)
 // This ensures environment variables are available even if module loads before dotenv
 function getGoogleClient(): OAuth2Client | null {
+  // Ensure dotenv is loaded (safety check - reloads in case of module caching)
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+  
   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
   const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
   
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    // Debug logging to help diagnose issues
+    console.error('getGoogleClient - Missing environment variables:', {
+      hasClientId: !!GOOGLE_CLIENT_ID,
+      hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+      googleEnvKeys: Object.keys(process.env).filter(k => k.includes('GOOGLE'))
+    })
     return null
   }
   
