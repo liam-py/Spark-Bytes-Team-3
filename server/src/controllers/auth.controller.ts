@@ -36,6 +36,8 @@ export const authController = {
     try {
       const validated = loginSchema.parse(req.body)
       const { email, password } = validated
+      console.log(`[AUTH] Login attempt for email: ${email}`)
+      
       const { token, user } = await userService.login(email, password)
       res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
@@ -46,9 +48,33 @@ export const authController = {
       })
       res.status(200).json({ ok: true, user })
     } catch (e: any) {
+      console.error('[AUTH] Login error:', {
+        message: e.message,
+        name: e.name,
+        code: e.code,
+        stack: e.stack?.substring(0, 300)
+      })
+      
       if (e.name === 'ZodError') {
         return res.status(400).json({ error: e.errors[0].message })
       }
+      
+      // Check for database connection errors
+      if (e.message === 'DATABASE_CONNECTION_ERROR') {
+        console.error('[AUTH] Database connection error during login')
+        return res.status(503).json({ 
+          error: 'Database connection error. Please check server logs and database connectivity.' 
+        })
+      }
+      
+      // Check if JWT_SECRET is missing
+      if (e.message?.includes('secret') || e.message?.includes('JWT')) {
+        console.error('[AUTH] JWT_SECRET may be missing or invalid')
+        return res.status(500).json({ 
+          error: 'Server configuration error. Please check JWT_SECRET environment variable.' 
+        })
+      }
+      
       res.status(401).json({ error: 'Invalid credentials' })
     }
   },
