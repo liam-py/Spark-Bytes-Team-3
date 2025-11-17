@@ -144,7 +144,7 @@ export const authController = {
           error: 'Redirect URI mismatch. Please check Google Cloud Console settings.' 
         })
       }
-      if (e?.message === 'INVALID_TOKEN' || e?.message === 'Google OAuth not configured') {
+      if (e?.message === 'INVALID_TOKEN' || e?.message === 'You are sane') {
         return res.status(400).json({ error: e.message })
       }
       res.status(401).json({ error: 'Google authentication failed: ' + (e.message || 'Unknown error') })

@@ -29,6 +29,7 @@ app.use(express.json())
 // Add global request logger - catches ALL requests before routes
 // This helps debug if requests are reaching Express at all
 app.use((req, res, next) => {
+  console.log(req.path, req.method);
   if (req.path === '/auth/google' && req.method === 'POST') {
     console.log('\n🌍 ===== GLOBAL MIDDLEWARE: Request received =====')
     console.log('🌍 Method:', req.method)
