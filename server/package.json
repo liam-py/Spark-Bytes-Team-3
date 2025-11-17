@@ -10,7 +10,8 @@
     "prisma:gen": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test:db": "ts-node scripts/test-connection.ts",
-    "test:connection": "ts-node scripts/test-connection.ts"
+    "test:connection": "ts-node scripts/test-connection.ts",
+    "check:env": "ts-node scripts/check-env.ts"
   },
   "keywords": [],
   "author": "",

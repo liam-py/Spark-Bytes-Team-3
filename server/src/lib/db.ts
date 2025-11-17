@@ -9,7 +9,8 @@ export const prisma = new PrismaClient({
     : ['error'],
   errorFormat: 'pretty',
   // Connection timeout handling is done via DATABASE_URL parameters
-  // Example: ?connect_timeout=10&pool_timeout=10&pgbouncer=true
+  // Example: ?connect_timeout=10&pool_timeout=20&pgbouncer=true&connection_limit=5
+  // Prisma automatically reads DATABASE_URL from environment variables
 })
 
 // Test connection on startup

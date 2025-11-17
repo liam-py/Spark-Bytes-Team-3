@@ -77,23 +77,57 @@ export const userService = {
   },
 
   async login(email: string, password: string) {
-    const user = await userRepo.findByEmail(email)
-    if (!user) throw new Error('INVALID_CREDENTIALS')
-    const ok = await bcrypt.compare(password, user.passwordHash)
-    if (!ok) throw new Error('INVALID_CREDENTIALS')
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    )
-    const publicUser = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      isOrganizer: user.isOrganizer,
+    try {
+      const user = await userRepo.findByEmail(email)
+      if (!user) {
+        console.log(`[LOGIN] User not found for email: ${email}`)
+        throw new Error('INVALID_CREDENTIALS')
+      }
+      console.log(`[LOGIN] User found: ${user.email}, role: ${user.role}`)
+      
+      const ok = await bcrypt.compare(password, user.passwordHash)
+      if (!ok) {
+        console.log(`[LOGIN] Password mismatch for email: ${email}`)
+        throw new Error('INVALID_CREDENTIALS')
+      }
+      console.log(`[LOGIN] Password verified for email: ${email}`)
+      
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      )
+      const publicUser = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isOrganizer: user.isOrganizer,
+      }
+      console.log(`[LOGIN] Successfully logged in user: ${user.email}`)
+      return { token, user: publicUser }
+    } catch (error: any) {
+      // Re-throw INVALID_CREDENTIALS as-is
+      if (error.message === 'INVALID_CREDENTIALS') {
+        throw error
+      }
+      // Log database connection errors separately
+      console.error('[LOGIN] Database error during login:', {
+        message: error.message,
+        code: error.code,
+        name: error.name,
+        email: email
+      })
+      // Re-throw as a more specific error for database issues
+      // P1001: Can't reach database server
+      // P1002: Database server doesn't accept connections
+      // P1003: Database does not exist
+      // P2024: Connection pool timeout
+      if (error.code === 'P1001' || error.code === 'P1002' || error.code === 'P1003' || error.code === 'P2024' || error.message?.includes('connection')) {
+        throw new Error('DATABASE_CONNECTION_ERROR')
+      }
+      throw new Error('INVALID_CREDENTIALS')
     }
-    return { token, user: publicUser }
   },
 
   async loginWithGoogle(code: string, redirectUri?: string) {
