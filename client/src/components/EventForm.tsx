@@ -219,10 +219,31 @@ export default function EventForm() {
             <TextField
               label="Quantity"
               type="number"
-              value={item.quantity}
-              onChange={(e) =>
-                updateFoodItem(index, "quantity", parseInt(e.target.value) || 1)
-              }
+              value={item.quantity === 0 ? "" : item.quantity}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow clearing the field while typing
+                if (value === "" || value === "-") {
+                  updateFoodItem(index, "quantity", 0);
+                } else {
+                  const numValue = parseInt(value, 10);
+                  if (!isNaN(numValue)) {
+                    // Update immediately with the parsed value (allows replacing)
+                    updateFoodItem(index, "quantity", numValue >= 1 ? numValue : 0);
+                  }
+                }
+              }}
+              onBlur={(e) => {
+                // Ensure minimum value of 1 when field loses focus
+                const value = parseInt(e.target.value, 10);
+                if (isNaN(value) || value < 1) {
+                  updateFoodItem(index, "quantity", 1);
+                }
+              }}
+              onFocus={(e) => {
+                // Select all text when focused for easy replacement
+                e.target.select();
+              }}
               required
               sx={{ width: 120 }}
               inputProps={{ min: 1 }}
