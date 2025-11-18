@@ -102,5 +102,18 @@ export const eventController = {
       res.status(400).json({ error: e.message || 'Failed to delete event' })
     }
   },
+
+  getMyEvents: async (req: AuthRequest, res: Response) => {
+    try {
+      if (!req.userId) {
+        return res.status(401).json({ error: 'Authentication required' })
+      }
+      const pastOnly = req.query.past === 'true'
+      const events = await eventService.getEventsByUser(req.userId, pastOnly)
+      res.json(events)
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || 'Failed to get events' })
+    }
+  },
 }
 

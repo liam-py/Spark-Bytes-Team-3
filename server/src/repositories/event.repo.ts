@@ -115,6 +115,36 @@ export const eventRepo = {
     })
   },
 
+  findByCreator: (userId: string, options?: { pastOnly?: boolean }) => {
+    const where: any = {
+      createdBy: userId,
+    }
+
+    // If pastOnly is true, only return events that have ended
+    if (options?.pastOnly) {
+      where.endTime = {
+        lt: new Date(),
+      }
+    }
+
+    return prisma.event.findMany({
+      where,
+      include: {
+        foodItems: true,
+        creator: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        startTime: 'desc', // Most recent first for past events
+      },
+    })
+  },
+
   update: (id: string, data: {
     title?: string
     description?: string

@@ -49,6 +49,10 @@ export const eventService = {
     return eventRepo.findAll(filters)
   },
 
+  async getEventsByUser(userId: string, pastOnly: boolean = false) {
+    return eventRepo.findByCreator(userId, { pastOnly })
+  },
+
   async updateEvent(
     eventId: string,
     userId: string,

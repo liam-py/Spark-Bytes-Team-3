@@ -4,9 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
-  Card,
-  CardContent,
-  CardMedia,
   Typography,
   Button,
   Box,
@@ -18,8 +15,6 @@ import {
   Chip,
   Paper,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Link from "next/link";
 import EventCard from "@/components/EventCard";
 
@@ -171,9 +166,25 @@ export default function EventsPage() {
             Browse Events
           </Typography>
           {isAdmin && (
-            <Typography variant="h4" component="h1" gutterBottom sx={{ opacity: 0.5 }}>
-              View My Past Events
-            </Typography>
+            <Link href="events/past" style={{ textDecoration: "none" }}>
+              <Typography 
+                variant="h4" 
+                component="h1" 
+                gutterBottom 
+                sx={{ 
+                  opacity: 0.4,
+                  "&:hover": {
+                    textDecoration: "underline",
+                    opacity: 0.8,
+                  },
+                  cursor: "pointer",
+                  transition: "opacity 0.2s ease-in-out",
+                  color: "black",
+                }}
+              >
+                View My Past Events
+              </Typography>
+            </Link>
           )}
         </Box>
 
