@@ -63,10 +63,10 @@ export default function Home() {
           minHeight: "60vh",
         }}
       >
-        <Typography variant="h1" component="h1" gutterBottom>
+        <Typography variant="h1" component="h1" gutterBottom sx={{ color: "primary.main" }}>
           Spark! Bytes
         </Typography>
-        <Typography variant="h2" component="h2" gutterBottom>
+        <Typography variant="h2" component="h2" gutterBottom sx={{ color: "primary.main" }}>
           Free food is one click away!
         </Typography>
         <Link href="/login">

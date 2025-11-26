@@ -4,6 +4,8 @@ import React from "react";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 import Link from "next/link";
 import AdminLoginContent from "@/components/AdminLoginContent";
+//added the theme to the page
+import theme from "@/theme";
 
 export default function AdminLoginPage() {
   return (
@@ -17,7 +19,7 @@ export default function AdminLoginPage() {
       }}
     >
       <Link href="/" style={{ textDecoration: "none" }}>
-        <Typography variant="h1" component="h1" gutterBottom>
+        <Typography variant="h1" component="h1" gutterBottom sx={{ color: "primary.main" }}>
           Spark! Bytes
         </Typography>
       </Link>

@@ -1,10 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, Tabs, Tab, Typography, Box } from "@mui/material";
+import { 
+  Card, 
+  CardContent, 
+  Tabs, 
+  Tab, 
+  Typography, 
+  Box } 
+  from "@mui/material";
 import Link from "next/link";
 import LoginContent from "@/components/LoginContent";
 import SignupContent from "@/components/SignupContent";
+//added the theme to the page
+import theme from "@/theme";
 
 export default function StudentLoginPage() {
   const [currentTab, setCurrentTab] = useState(0);
@@ -16,7 +25,9 @@ export default function StudentLoginPage() {
   return (
     <Box
       sx={{
+        background: "linear-gradient(135deg, #3C93A5 0%, #2B7280 50%, #CDFFFF 100%)",
         display: "flex",
+        padding: 2,
         flexDirection: "column",
         alignItems: "center",
         minHeight: "100vh",
@@ -24,7 +35,7 @@ export default function StudentLoginPage() {
       }}
     >
       <Link href="/" style={{ textDecoration: "none" }}>
-        <Typography variant="h1" component="h1" gutterBottom>
+        <Typography variant="h1" component="h1" gutterBottom sx={{ color: "#FFFFFF" }}>
           Spark! Bytes
         </Typography>
       </Link>

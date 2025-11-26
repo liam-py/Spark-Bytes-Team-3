@@ -14,6 +14,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import Image from "next/image";
+import logo from "@/public/logo.png";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -67,28 +69,32 @@ export default function Navbar() {
     <AppBar position="static">
       <Toolbar>
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 0, mr: 4 }}>
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ flexGrow: 0, mr: 4, color: "primary.main" }}
+          >
             Spark! Bytes
           </Typography>
         </Link>
         <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
           <Link href="/events" style={{ textDecoration: "none" }}>
-            <Button color="inherit">Events</Button>
+            <Button sx={{ color: "primary.main" }}>Events</Button>
           </Link>
           {user && (
             <>
               {isStudent && (
                 <Link href="/reservations" style={{ textDecoration: "none" }}>
-                  <Button color="inherit">My Reservations</Button>
+                  <Button sx={{ color: "primary.main" }}>My Reservations</Button>
                 </Link>
               )}
               {isAdmin && (
                 <>
                   <Link href="/events/new" style={{ textDecoration: "none" }}>
-                    <Button color="inherit">Create Event</Button>
+                    <Button sx={{ color: "primary.main" }}>Create Event</Button>
                   </Link>
                   <Link href="/admin/analytics" style={{ textDecoration: "none" }}>
-                    <Button color="inherit">Analytics</Button>
+                    <Button sx={{ color: "primary.main" }}>Analytics</Button>
                   </Link>
                 </>
               )}
@@ -103,7 +109,7 @@ export default function Navbar() {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
-              color="inherit"
+              sx={{ color: "primary.main" }}
             >
               <AccountCircle />
             </IconButton>
@@ -134,12 +140,21 @@ export default function Navbar() {
             </Menu>
           </Box>
         ) : (
-          <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            cursor: "pointer", 
+            transition: "transform 0.2s ease-in-out", 
+            gap: 1,
+            "&:hover": {
+              transform: "scale(1.05)"
+            }
+          }}>
             <Link href="/login" style={{ textDecoration: "none" }}>
-              <Button color="inherit">Student Login</Button>
+              <Button sx={{ color: "primary.main" }}>Student Login</Button>
             </Link>
             <Link href="/admin/login" style={{ textDecoration: "none" }}>
-              <Button color="inherit">Admin Login</Button>
+              <Button sx={{ color: "primary.main" }}>Admin Login</Button>
             </Link>
           </Box>
         )}
