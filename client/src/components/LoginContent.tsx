@@ -51,6 +51,8 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
       }
 
       setSuccess(true);
+      // sends an event to let rest of site (navbar) know that there's been 
+      window.dispatchEvent(new Event("authchange"));
       setTimeout(() => {
         // Redirect based on role
         if (data.user?.role === "ADMIN") {

@@ -14,19 +14,19 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import Image from "next/image";
-import logo from "@/public/logo.png";
+
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, []); // Fetch on mount
 
   const fetchUser = async () => {
     try {
@@ -34,9 +34,14 @@ export default function Navbar() {
         credentials: "include",
       });
       const data = await res.json();
-      setUser(data.user);
-    } catch {
+      // Debug logging
+      console.log("Navbar - User data:", data);
+      setUser(data.user || null);
+    } catch (error) {
+      console.error("Error fetching user:", error);
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,15 +60,23 @@ export default function Navbar() {
         credentials: "include",
       });
       setUser(null);
+      handleClose();
       router.push("/");
-    } catch {
-      // Handle error
+      // Force a refresh of user state
+      setTimeout(() => fetchUser(), 100);
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
-    handleClose();
   };
 
   const isAdmin = user?.role === "ADMIN";
   const isStudent = user?.role === "STUDENT" || (!isAdmin && user);
+
+  // Debug: Log user state
+  useEffect(() => {
+    console.log("Navbar - Current user state:", user);
+    console.log("Navbar - Loading state:", loading);
+  }, [user, loading]);
 
   return (
     <AppBar position="static">
@@ -101,63 +114,65 @@ export default function Navbar() {
             </>
           )}
         </Box>
-        {user ? (
-          <Box>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              sx={{ color: "primary.main" }}
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleClose}>
-                <Link
-                  href="/profile"
-                  style={{ textDecoration: "none", color: "inherit" }}
+        {!loading ? (
+          user ? (
+              <Box>
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  sx={{ color: "primary.main" }}
                 >
-                  Profile
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleClose}>
+                    <Link
+                      href="/profile"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      Profile
+                    </Link>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+              </Box>
+            ) : (
+              <Box sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                cursor: "pointer", 
+                transition: "transform 0.2s ease-in-out", 
+                gap: 1,
+                "&:hover": {
+                  transform: "scale(1.05)"
+                }
+              }}>
+                <Link href="/login" style={{ textDecoration: "none" }}>
+                  <Button sx={{ color: "primary.main" }}>Student Login</Button>
                 </Link>
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-          </Box>
-        ) : (
-          <Box sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            cursor: "pointer", 
-            transition: "transform 0.2s ease-in-out", 
-            gap: 1,
-            "&:hover": {
-              transform: "scale(1.05)"
-            }
-          }}>
-            <Link href="/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Student Login</Button>
-            </Link>
-            <Link href="/admin/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Admin Login</Button>
-            </Link>
-          </Box>
-        )}
+                <Link href="/admin/login" style={{ textDecoration: "none" }}>
+                  <Button sx={{ color: "primary.main" }}>Admin Login</Button>
+                </Link>
+              </Box>
+            )
+        ) : null}
       </Toolbar>
     </AppBar>
   );
