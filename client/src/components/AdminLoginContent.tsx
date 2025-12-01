@@ -1,18 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-  Snackbar,
-  Divider,
-  Paper,
-} from "@mui/material";
+import { TextField, Button, Typography, Box, Alert, Snackbar, Divider } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useAuth } from "@/app/providers/AuthProvider"; // <-- adjust if your path differs
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -24,6 +16,7 @@ export default function AdminLoginContent() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const { refreshUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +45,7 @@ export default function AdminLoginContent() {
       }
 
       setSuccess(true);
+      await refreshUser(); // refresh global auth provider
       setTimeout(() => {
         router.push("/admin/analytics");
       }, 1000);
@@ -95,6 +89,7 @@ export default function AdminLoginContent() {
       }
 
       setSuccess(true);
+      await refreshUser(); // refresh global auth provider
       setTimeout(() => {
         router.push("/admin/analytics");
       }, 1000);
