@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import { useAuth } from "@/app/providers/AuthProvider"; // <-- adjust if your path differs
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -40,7 +40,7 @@ export default function Navbar() {
         method: "POST",
         credentials: "include",
       });
-      // Update global auth state so Navbar and other consumers react
+      // Update global auth state so Navbar can react
       await refreshUser();
       handleClose();
       router.push("/");
@@ -59,7 +59,7 @@ export default function Navbar() {
       <Toolbar>
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <Typography
-            variant="h6"
+            variant="h4"
             component="div"
             sx={{ flexGrow: 0, mr: 4, color: "primary.main" }}
           >
@@ -69,7 +69,7 @@ export default function Navbar() {
 
         <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
           <Link href="/events" style={{ textDecoration: "none" }}>
-            <Button sx={{ color: "primary.main" }}>Events</Button>
+            <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Events</Button>
           </Link>
 
           {/* Only show these when we have a logged-in user */}
@@ -77,16 +77,16 @@ export default function Navbar() {
             <>
               {isStudent && (
                 <Link href="/reservations" style={{ textDecoration: "none" }}>
-                  <Button sx={{ color: "primary.main" }}>My Reservations</Button>
+                  <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>My Reservations</Button>
                 </Link>
               )}
               {isAdmin && (
                 <>
                   <Link href="/events/new" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main" }}>Create Event</Button>
+                    <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Create Event</Button>
                   </Link>
                   <Link href="/admin/analytics" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main" }}>Analytics</Button>
+                    <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Analytics</Button>
                   </Link>
                 </>
               )}
@@ -145,18 +145,14 @@ export default function Navbar() {
               display: "flex",
               alignItems: "center",
               cursor: "pointer",
-              transition: "transform 0.2s ease-in-out",
-              gap: 1,
-              "&:hover": {
-                transform: "scale(1.05)",
-              },
+              gap: 1
             }}
           >
             <Link href="/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Student Login</Button>
+              <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Student Login</Button>
             </Link>
             <Link href="/admin/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Admin Login</Button>
+              <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Admin Login</Button>
             </Link>
           </Box>
         )}

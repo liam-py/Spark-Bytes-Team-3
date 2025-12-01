@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { TextField, Button, Typography, Box, Alert, Snackbar, Divider } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useAuth } from "@/app/providers/AuthProvider"; // <-- adjust if your path differs
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
