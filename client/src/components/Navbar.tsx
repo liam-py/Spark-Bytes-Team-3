@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -10,35 +10,20 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import Image from "next/image";
-import logo from "@/public/logo.png";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export default function Navbar() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const { user, refreshUser } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
-    try {
-      const res = await fetch(`${base}/auth/me`, {
-        credentials: "include",
-      });
-      const data = await res.json();
-      setUser(data.user);
-    } catch {
-      setUser(null);
-    }
-  };
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -49,59 +34,71 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       await fetch(`${base}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
-      setUser(null);
+      // Update global auth state so Navbar can react
+      await refreshUser();
+      handleClose();
       router.push("/");
-    } catch {
-      // Handle error
+    } catch (error) {
+      console.error("Error logging out:", error);
+    } finally {
+      setLoggingOut(false);
     }
-    handleClose();
   };
 
   const isAdmin = user?.role === "ADMIN";
-  const isStudent = user?.role === "STUDENT" || (!isAdmin && user);
+  const isStudent = user?.role === "STUDENT" || (!isAdmin && !!user);
 
   return (
     <AppBar position="static">
-      <Toolbar>
+      <Toolbar sx={{ display: "flex", alignItems: "center", my: "9px"}}>
+        <img src="/smallLogo.png" alt="Spark! Bytes" style={{ marginTop: 10, marginBottom: 10, width: 50, height: 50 }} />
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ flexGrow: 0, mr: 4, color: "primary.main" }}
+          <Typography
+            component="div"
+            sx={{ mx: "28px", my: "12px", fontWeight: "bold", fontSize: "1.7rem", flexGrow: 0, mr: 4, color: "primary.main" }}
           >
             Spark! Bytes
           </Typography>
         </Link>
-        <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
+
+        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Link href="/events" style={{ textDecoration: "none" }}>
-            <Button sx={{ color: "primary.main" }}>Events</Button>
+            <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Events</Button>
           </Link>
+
+          {/* Only show these when we have a logged-in user */}
           {user && (
             <>
               {isStudent && (
                 <Link href="/reservations" style={{ textDecoration: "none" }}>
-                  <Button sx={{ color: "primary.main" }}>My Reservations</Button>
+                  <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>My Reservations</Button>
                 </Link>
               )}
               {isAdmin && (
                 <>
                   <Link href="/events/new" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main" }}>Create Event</Button>
+                    <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Create Event</Button>
                   </Link>
                   <Link href="/admin/analytics" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main" }}>Analytics</Button>
+                    <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Analytics</Button>
                   </Link>
                 </>
               )}
             </>
           )}
         </Box>
-        {user ? (
+
+        {/* If user is undefined => still loading initial auth check */}
+        {user === undefined ? (
+          <CircularProgress color="inherit" size={24} />
+        ) : user ? (
+          // Authenticated
           <Box>
             <IconButton
               size="large"
@@ -109,7 +106,7 @@ export default function Navbar() {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
-              sx={{ color: "primary.main" }}
+              sx={{ width: 40, height: 40, color: "primary.main" }}
             >
               <AccountCircle />
             </IconButton>
@@ -136,25 +133,26 @@ export default function Navbar() {
                   Profile
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout} disabled={loggingOut}>
+                {loggingOut ? "Logging out..." : "Logout"}
+              </MenuItem>
             </Menu>
           </Box>
         ) : (
-          <Box sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            cursor: "pointer", 
-            transition: "transform 0.2s ease-in-out", 
-            gap: 1,
-            "&:hover": {
-              transform: "scale(1.05)"
-            }
-          }}>
+          // Not authenticated
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              gap: 1
+            }}
+          >
             <Link href="/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Student Login</Button>
+              <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Student Login</Button>
             </Link>
             <Link href="/admin/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main" }}>Admin Login</Button>
+              <Button sx={{ fontWeight: "normal", fontSize: "1.2em", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Admin Login</Button>
             </Link>
           </Box>
         )}

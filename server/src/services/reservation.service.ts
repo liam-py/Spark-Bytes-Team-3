@@ -7,14 +7,14 @@ export const reservationService = {
     userId: string,
     data: {
       eventId: string
-      foodItemId?: string
+      foodItemId: string
       quantity: number
     }
   ) {
     // Check if user already reserved this event
-    const existing = await reservationRepo.findByEventAndUser(data.eventId, userId)
+    const existing = await reservationRepo.findByFoodItemAndUser(data.foodItemId, userId)
     if (existing) {
-      throw new Error('ALREADY_RESERVED')
+      throw new Error('ALREADY_RESERVED_THIS_ITEM')
     }
 
     // Get event and check availability
@@ -29,7 +29,7 @@ export const reservationService = {
         throw new Error('FOOD_ITEM_NOT_FOUND')
       }
       if (foodItem.reserved + data.quantity > foodItem.quantity) {
-        throw new Error('INSUFFICIENT_QUANTITY')
+        throw new Error('INSUFFICIENT_QUANTITY') 
       }
 
       // Update food item reserved count

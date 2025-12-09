@@ -87,7 +87,13 @@ export default function EventDetailPage() {
     }
   };
 
-  const handleReserve = async () => {
+  const handleReserve = async (foodItemId: string) => {
+    console.log("CLIENT SENDING:", {
+      eventId: params.id,
+      foodItemId,
+      quantity: 1,
+    });
+
     if (!user) {
       router.push("/login");
       return;
@@ -105,9 +111,10 @@ export default function EventDetailPage() {
         credentials: "include",
         body: JSON.stringify({
           eventId: params.id,
+          foodItemId: foodItemId, // the actual food item's ID
           quantity: 1,
         }),
-      });
+      });      
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Failed to reserve");
@@ -239,25 +246,31 @@ export default function EventDetailPage() {
           Available Food
         </Typography>
         {event.foodItems?.map((item: any) => (
-          <Chip
-            key={item.id}
-            label={`${item.name} - ${item.quantity - item.reserved}/${item.quantity} available`}
-            sx={{ mr: 1, mb: 1 }}
-            color={
-              item.reserved < item.quantity ? "success" : "default"
-            }
-          />
+          <Box
+          key={item.id}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 1,
+          }}
+          >
+            <Chip
+              label={`${item.name} - ${item.quantity - item.reserved}/${item.quantity} available`}
+              sx={{ mr: 1 }}
+              color={item.reserved < item.quantity ? "success" : "default"}
+            />
+            
+            <Button
+              variant="contained"
+              size="small"
+              disabled={item.reserved >= item.quantity}
+              onClick={() => handleReserve(item.id)}
+            >
+              Reserve
+            </Button>
+          </Box>
         ))}
       </Box>
-
-      {/* Student-only: Reserve button */}
-      {isStudent && !hasReservation && canReserve && (
-        <Box sx={{ mt: 3 }}>
-          <Button variant="contained" onClick={handleReserve}>
-            Reserve Food
-          </Button>
-        </Box>
-      )}
 
       {isStudent && hasReservation && (
         <Alert severity="success" sx={{ mt: 2 }}>

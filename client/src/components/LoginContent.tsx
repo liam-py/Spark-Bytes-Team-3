@@ -1,17 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-  Snackbar,
-  Divider,
-} from "@mui/material";
+import { TextField, Button, Typography, Box, Alert, Snackbar, Divider } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -23,6 +16,7 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const { refreshUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +45,7 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
       }
 
       setSuccess(true);
+      await refreshUser(); // refresh global auth provider
       setTimeout(() => {
         // Redirect based on role
         if (data.user?.role === "ADMIN") {
@@ -70,8 +65,6 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
     setError("");
 
     try {
-      // The redirect URI must match exactly what's in Google Cloud Console
-      // For @react-oauth/google with auth-code flow, it uses the current origin
       const redirectUri = window.location.origin;
       
       console.log('Google OAuth response:', {
@@ -107,6 +100,7 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
       }
 
       setSuccess(true);
+      await refreshUser(); // refresh global auth provider
       setTimeout(() => {
         if (data.user?.role === "ADMIN") {
           router.push("/admin/analytics");
