@@ -92,5 +92,14 @@ export const reservationRepo = {
       data: { status },
     })
   },
+
+  findByFoodItemAndUser: (foodItemId: string, userId: string) => {
+    return prisma.reservation.findFirst({
+      where: {
+        foodItemId,
+        userId,
+      },
+    });
+  }
 }
 

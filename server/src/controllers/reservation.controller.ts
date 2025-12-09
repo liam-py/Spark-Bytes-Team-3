@@ -6,6 +6,7 @@ import { userRepo } from '../repositories/user.repo'
 
 export const reservationController = {
   create: async (req: AuthRequest, res: Response) => {
+    console.log("REQ BODY:", req.body);
     try {
       if (!req.userId) {
         return res.status(401).json({ error: 'Authentication required' })
