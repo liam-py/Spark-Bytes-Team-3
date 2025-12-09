@@ -98,6 +98,7 @@ export const reservationRepo = {
       where: {
         foodItemId,
         userId,
+        status: 'ACTIVE'
       },
     });
   }
