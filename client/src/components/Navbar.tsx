@@ -56,20 +56,20 @@ export default function Navbar() {
 
   return (
     <AppBar position="static">
-      <Toolbar>
+      <Toolbar sx={{ display: "flex", alignItems: "center", my: "9px"}}>
+        <img src="/smallLogo.png" alt="Spark! Bytes" style={{ marginTop: 10, marginBottom: 10, width: 50, height: 50 }} />
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <Typography
-            variant="h4"
             component="div"
-            sx={{ flexGrow: 0, mr: 4, color: "primary.main" }}
+            sx={{ mx: "28px", my: "12px", fontWeight: "bold", fontSize: "1.7rem", flexGrow: 0, mr: 4, color: "primary.main" }}
           >
             Spark! Bytes
           </Typography>
         </Link>
 
-        <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
+        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Link href="/events" style={{ textDecoration: "none" }}>
-            <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Events</Button>
+            <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Events</Button>
           </Link>
 
           {/* Only show these when we have a logged-in user */}
@@ -77,16 +77,16 @@ export default function Navbar() {
             <>
               {isStudent && (
                 <Link href="/reservations" style={{ textDecoration: "none" }}>
-                  <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>My Reservations</Button>
+                  <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>My Reservations</Button>
                 </Link>
               )}
               {isAdmin && (
                 <>
                   <Link href="/events/new" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Create Event</Button>
+                    <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Create Event</Button>
                   </Link>
                   <Link href="/admin/analytics" style={{ textDecoration: "none" }}>
-                    <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Analytics</Button>
+                    <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Analytics</Button>
                   </Link>
                 </>
               )}
@@ -106,7 +106,7 @@ export default function Navbar() {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
-              sx={{ color: "primary.main" }}
+              sx={{ width: 40, height: 40, color: "primary.main" }}
             >
               <AccountCircle />
             </IconButton>
@@ -149,10 +149,10 @@ export default function Navbar() {
             }}
           >
             <Link href="/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Student Login</Button>
+              <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Student Login</Button>
             </Link>
             <Link href="/admin/login" style={{ textDecoration: "none" }}>
-              <Button sx={{ color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Admin Login</Button>
+              <Button sx={{ fontWeight: "normal", fontSize: "1.2em", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Admin Login</Button>
             </Link>
           </Box>
         )}
