@@ -38,7 +38,7 @@ async function testConnection() {
     try {
       const userCount = await prisma.user.count()
       console.log(`✓ Can read from User table (${userCount} users)`)
-    } catch (error: any) {
+  } catch (error: any) {
       console.warn('⚠ Could not read from User table:', error.message)
     }
     

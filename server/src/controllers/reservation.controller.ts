@@ -37,6 +37,9 @@ export const reservationController = {
       if (e.message === 'INSUFFICIENT_QUANTITY' || e.message === 'NO_AVAILABLE_FOOD') {
         return res.status(400).json({ error: 'No food available. Reservations closed.' })
       }
+      if (e.message === 'CANNOT_RESERVE_OWN_EVENT') {
+        return res.status(403).json({ error: 'You cannot reserve food from your own event.' })
+      }
       res.status(400).json({ error: e.message || 'Failed to create reservation' })
     }
   },

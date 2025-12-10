@@ -17,11 +17,11 @@ import {
   Divider,
   Grid,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -78,6 +78,7 @@ export default function EventDetailPage() {
 
   const checkReservation = async () => {
     if (user?.role === "ADMIN") return; // Admins don't reserve
+    if (event && user && event.createdBy === user.id) return; // Event creators don't reserve
     try {
       const res = await fetch(`${base}/api/reservations`, {
         credentials: "include",
@@ -120,6 +121,11 @@ export default function EventDetailPage() {
 
     if (user.role === "ADMIN") {
       setError("Admins cannot reserve food. Please use student account.");
+      return;
+    }
+
+    if (isEventCreator) {
+      setError("You cannot reserve food from your own event.");
       return;
     }
 
@@ -213,8 +219,8 @@ export default function EventDetailPage() {
 
   if (!event) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
+      <Container maxWidth="md" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+        <CircularProgress />
       </Container>
     );
   }
@@ -229,6 +235,7 @@ export default function EventDetailPage() {
   const isAdmin = user?.role === "ADMIN";
   const isStudent = user && user.role !== "ADMIN";
   const canEdit = isAdmin || (user && event.createdBy === user.id);
+  const isEventCreator = user && event.createdBy === user.id;
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -252,12 +259,12 @@ export default function EventDetailPage() {
             </Typography>
             {canEdit && (
               <Box sx={{ display: "flex", gap: 1 }}>
-                <Link href={`/events/${params.id}/edit`} style={{ textDecoration: "none" }}>
-                  <IconButton color="primary" size="small">
-                    <EditIcon />
-                  </IconButton>
-                </Link>
-                <IconButton color="error" size="small" onClick={handleDelete}>
+                <IconButton 
+                  color="error" 
+                  size="small" 
+                  onClick={handleDelete}
+                  title="Delete Event"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>
@@ -310,7 +317,7 @@ export default function EventDetailPage() {
               {event.foodItems?.map((item: any) => {
                 const isReserved = reservedFoodItems.has(item.id);
                 const isAvailable = item.reserved < item.quantity;
-                const isDisabled = !isAvailable || isReserved || loading === item.id;
+                const isDisabled = !isAvailable || isReserved || loading === item.id || isEventCreator;
 
                 return (
                   <Grid item xs={12} key={item.id}>
@@ -400,6 +407,12 @@ export default function EventDetailPage() {
       {!canReserve && event.foodItems?.length > 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           No food available. Reservations closed.
+        </Alert>
+      )}
+
+      {isEventCreator && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          You created this event. You cannot reserve food from your own event.
         </Alert>
       )}
 

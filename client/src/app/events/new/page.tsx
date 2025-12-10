@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Alert } from "@mui/material";
+import { Container, Typography, Alert, CircularProgress } from "@mui/material";
 import { useRouter } from "next/navigation";
 import EventForm from "@/components/EventForm";
 
@@ -36,8 +36,8 @@ export default function NewEventPage() {
 
   if (loading) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
+      <Container maxWidth="md" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+        <CircularProgress />
       </Container>
     );
   }

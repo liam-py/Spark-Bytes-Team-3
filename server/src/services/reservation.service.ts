@@ -24,6 +24,11 @@ export const reservationService = {
       throw new Error('EVENT_NOT_FOUND')
     }
 
+    // Prevent event creators from reserving their own events
+    if (event.createdBy === userId) {
+      throw new Error('CANNOT_RESERVE_OWN_EVENT')
+    }
+
     if (data.foodItemId) {
       const foodItem = event.foodItems.find((item) => item.id === data.foodItemId)
       if (!foodItem) {

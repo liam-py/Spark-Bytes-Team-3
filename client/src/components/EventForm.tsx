@@ -10,6 +10,10 @@ import {
   Chip,
   Alert,
   Snackbar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -18,11 +22,35 @@ import ImageUpload from "./ImageUpload";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
+const BU_LOCATIONS = [
+  "CAS Building (College of Arts & Sciences)",
+  "GSU (George Sherman Union)",
+  "COM (College of Communication)",
+  "ENG (College of Engineering)",
+  "Questrom School of Business",
+  "Sargent College (Health & Rehabilitation Sciences)",
+  "CDS (Center for Data Science)",
+  "BU Spark! Space",
+  "Metcalf Hall",
+  "GSU Food Court",
+  "CGSA (Center for Gender, Sexuality, and Activism)",
+  "CGS (College of General Studies)",
+  "CFA (College of Fine Arts)",
+  "Mugar Memorial Library",
+  "FitRec (Fitness & Recreation Center)",
+  "Warren Towers",
+  "West Campus",
+  "East Campus",
+  "Other",
+];
+
 export default function EventForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [locationType, setLocationType] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [imagePath, setImagePath] = useState("");
@@ -54,10 +82,29 @@ export default function EventForm() {
     setFoodItems(updated);
   };
 
+  const handleLocationChange = (value: string) => {
+    setLocationType(value);
+    if (value === "Other") {
+      setLocation("");
+    } else {
+      setLocation(value);
+      setCustomLocation("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // Determine final location value
+    const finalLocation = locationType === "Other" ? customLocation : location;
+    
+    if (!finalLocation) {
+      setError("Please enter a location");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch(`${base}/api/events`, {
@@ -67,7 +114,7 @@ export default function EventForm() {
         body: JSON.stringify({
           title,
           description,
-          location,
+          location: finalLocation,
           startTime: new Date(startTime).toISOString(),
           endTime: new Date(endTime).toISOString(),
           imagePath: imagePath || undefined,
@@ -109,14 +156,51 @@ export default function EventForm() {
         onChange={(e) => setDescription(e.target.value)}
         margin="normal"
       />
-      <TextField
-        fullWidth
-        label="Location"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        required
-        margin="normal"
-      />
+      <FormControl fullWidth required margin="normal">
+        <InputLabel id="location-label">Location</InputLabel>
+        <Select
+          labelId="location-label"
+          value={locationType}
+          onChange={(e) => handleLocationChange(e.target.value)}
+          label="Location"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+            anchorOrigin: {
+              vertical: 'bottom',
+              horizontal: 'left',
+            },
+            transformOrigin: {
+              vertical: 'top',
+              horizontal: 'left',
+            },
+            transitionDuration: 200,
+          }}
+        >
+          {BU_LOCATIONS.map((loc) => (
+            <MenuItem key={loc} value={loc}>
+              {loc}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {locationType === "Other" && (
+        <TextField
+          fullWidth
+          label="Enter Location"
+          value={customLocation}
+          onChange={(e) => {
+            setCustomLocation(e.target.value);
+            setLocation(e.target.value);
+          }}
+          required
+          margin="normal"
+          sx={{ mt: 1 }}
+        />
+      )}
       <TextField
         fullWidth
         label="Start Time"

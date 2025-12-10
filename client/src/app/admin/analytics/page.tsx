@@ -9,6 +9,7 @@ import {
   Grid,
   Box,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   BarChart,
@@ -58,8 +59,8 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
+      <Container maxWidth="lg" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+        <CircularProgress />
       </Container>
     );
   }
@@ -84,48 +85,54 @@ export default function AnalyticsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
         Analytics Dashboard
       </Typography>
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
                 Total Events
               </Typography>
-              <Typography variant="h4">{analytics.totalEvents}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+                {analytics.totalEvents}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
                 Total Reservations
               </Typography>
-              <Typography variant="h4">{analytics.totalReservations}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+                {analytics.totalReservations}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
                 Total Users
               </Typography>
-              <Typography variant="h4">{analytics.totalUsers}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+                {analytics.totalUsers}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
                 Events with Dietary Options
               </Typography>
-              <Typography variant="h4">
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
                 {analytics.eventsWithDietaryOptions}
               </Typography>
             </CardContent>
@@ -134,7 +141,7 @@ export default function AnalyticsPage() {
       </Grid>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
           Events by Organizer
         </Typography>
         <BarChart
@@ -153,7 +160,7 @@ export default function AnalyticsPage() {
       </Box>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
           Events with Dietary Options
         </Typography>
         <PieChart width={400} height={300}>
