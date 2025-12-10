@@ -24,6 +24,7 @@ Spark-Bytes-Team-3/
 - **Notifications**: Email notifications for new events (opt-in/out)
 - **Analytics Dashboard**: Admin-only analytics and statistics
 - **Modern UI**: Built with Material UI
+- **Admin User Management**: Admins can view users and delete accounts with related data
 
 ## User Roles
 
@@ -181,6 +182,10 @@ The application will be available at `http://localhost:3000`
 - `DELETE /api/reservations/:id` - Cancel reservation
 
 ### Other Endpoints
+- `GET /api/users` - List users with counts (admin only)
+- `GET /api/users/:userId` - User detail with recent activity (admin only)
+- `DELETE /api/users/:userId` - Delete a user and related data (admin only)
+- `DELETE /api/reservations/admin/:id` - Admin delete a reservation
 - `GET /api/dietary` - Get dietary preferences
 - `PUT /api/dietary` - Update dietary preferences
 - `POST /api/feedback` - Submit feedback (students only)

@@ -257,6 +257,18 @@ export const userService = {
     return userRepo.findByIdPublic(id)
   },
 
+  async listUsersWithStats() {
+    return userRepo.findAllWithStats()
+  },
+
+  async getUserActivity(userId: string) {
+    const user = await userRepo.getUserActivity(userId)
+    if (!user) {
+      throw new Error('NOT_FOUND')
+    }
+    return user
+  },
+
   async deleteUser(targetUserId: string, requesterId: string) {
     if (targetUserId === requesterId) {
       throw new Error('CANNOT_DELETE_SELF')

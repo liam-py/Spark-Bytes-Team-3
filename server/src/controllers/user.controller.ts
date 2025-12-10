@@ -3,6 +3,33 @@ import { AuthRequest } from '../middleware/auth.middleware'
 import { userService } from '../services/user.service'
 
 export const userController = {
+  list: async (_req: AuthRequest, res: Response) => {
+    try {
+      const users = await userService.listUsersWithStats()
+      return res.json(users)
+    } catch (e) {
+      console.error('Error listing users:', e)
+      return res.status(500).json({ error: 'Failed to list users' })
+    }
+  },
+
+  activity: async (req: AuthRequest, res: Response) => {
+    const targetUserId = req.params.userId
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'userId is required' })
+    }
+    try {
+      const user = await userService.getUserActivity(targetUserId)
+      return res.json(user)
+    } catch (e: any) {
+      if (e?.message === 'NOT_FOUND') {
+        return res.status(404).json({ error: 'User not found' })
+      }
+      console.error('Error fetching user activity:', e)
+      return res.status(500).json({ error: 'Failed to fetch user activity' })
+    }
+  },
+
   deleteUser: async (req: AuthRequest, res: Response) => {
     const targetUserId = req.params.userId
     if (!targetUserId) {

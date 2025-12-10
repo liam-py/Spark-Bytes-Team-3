@@ -134,4 +134,69 @@ export const userRepo = {
         }
       })
     ),
+
+  findAllWithStats: () =>
+    retryQuery(() =>
+      prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isOrganizer: true,
+          createdAt: true,
+          _count: {
+            select: {
+              events: true,
+              reservations: true,
+              feedbacks: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    ),
+
+  getUserActivity: (userId: string) =>
+    retryQuery(() =>
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isOrganizer: true,
+          createdAt: true,
+          events: {
+            select: {
+              id: true,
+              title: true,
+              startTime: true,
+              endTime: true,
+            },
+            orderBy: { startTime: 'desc' },
+            take: 20,
+          },
+          reservations: {
+            where: { status: 'ACTIVE' },
+            select: {
+              id: true,
+              reservedAt: true,
+              status: true,
+              event: {
+                select: {
+                  id: true,
+                  title: true,
+                  startTime: true,
+                  endTime: true,
+                },
+              },
+            },
+            orderBy: { reservedAt: 'desc' },
+            take: 20,
+          },
+        },
+      })
+    ),
 }

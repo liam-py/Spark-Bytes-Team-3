@@ -81,4 +81,20 @@ export const reservationController = {
       res.status(400).json({ error: e.message || 'Failed to cancel reservation' })
     }
   },
+
+  adminCancel: async (req: AuthRequest, res: Response) => {
+    try {
+      if (!req.userId) {
+        return res.status(401).json({ error: 'Authentication required' })
+      }
+      const { id } = req.params
+      await reservationService.cancelReservationAsAdmin(id)
+      res.json({ message: 'Reservation cancelled successfully' })
+    } catch (e: any) {
+      if (e.message === 'RESERVATION_NOT_FOUND') {
+        return res.status(404).json({ error: 'Reservation not found' })
+      }
+      res.status(400).json({ error: e.message || 'Failed to cancel reservation' })
+    }
+  },
 }

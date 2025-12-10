@@ -123,5 +123,24 @@ export const reservationService = {
 
     return reservationRepo.updateStatus(reservationId, 'CANCELLED')
   },
-}
 
+  async cancelReservationAsAdmin(reservationId: string) {
+    const reservation = await reservationRepo.findById(reservationId)
+    if (!reservation) {
+      throw new Error('RESERVATION_NOT_FOUND')
+    }
+
+    if (reservation.status === 'CANCELLED') {
+      return reservation
+    }
+
+    if (reservation.foodItemId) {
+      await prisma.foodItem.update({
+        where: { id: reservation.foodItemId },
+        data: { reserved: { decrement: reservation.quantity } },
+      })
+    }
+
+    return reservationRepo.updateStatus(reservationId, 'CANCELLED')
+  },
+}

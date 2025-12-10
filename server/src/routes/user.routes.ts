@@ -5,6 +5,8 @@ import { userController } from '../controllers/user.controller'
 
 const router = Router()
 
+router.get('/', requireAuth, requireAdmin, userController.list)
+router.get('/:userId', requireAuth, requireAdmin, userController.activity)
 router.delete('/:userId', requireAuth, requireAdmin, userController.deleteUser)
 
 export default router
