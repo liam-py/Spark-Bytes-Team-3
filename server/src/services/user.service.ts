@@ -256,4 +256,26 @@ export const userService = {
   async getPublicUser(id: string) {
     return userRepo.findByIdPublic(id)
   },
+
+  async deleteUser(targetUserId: string, requesterId: string) {
+    if (targetUserId === requesterId) {
+      throw new Error('CANNOT_DELETE_SELF')
+    }
+
+    const target = await userRepo.findById(targetUserId)
+    if (!target) {
+      throw new Error('NOT_FOUND')
+    }
+
+    // For safety, don't allow deleting other admins via this endpoint
+    if (target.role === 'ADMIN') {
+      throw new Error('CANNOT_DELETE_ADMIN')
+    }
+
+    const result = await userRepo.deleteCascade(targetUserId)
+    if (!result) {
+      throw new Error('NOT_FOUND')
+    }
+    return result
+  },
 }
