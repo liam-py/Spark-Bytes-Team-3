@@ -1,6 +1,7 @@
 import { reservationRepo } from '../repositories/reservation.repo'
 import { eventRepo } from '../repositories/event.repo'
 import { prisma } from '../lib/db'
+import { notificationService } from './notification.service'
 
 export const reservationService = {
   async createReservation(
@@ -55,12 +56,43 @@ export const reservationService = {
       })
     }
 
-    return reservationRepo.create({
+    const reservation = await reservationRepo.create({
       userId,
       eventId: data.eventId,
       foodItemId: data.foodItemId,
       quantity: data.quantity,
     })
+
+    console.log('\n🎫 ===== RESERVATION CREATED =====')
+    console.log('🎫 Reservation ID:', reservation.id)
+    console.log('🎫 User ID:', userId)
+    console.log('🎫 User Email:', reservation.user.email)
+    console.log('🎫 User Name:', reservation.user.name)
+    console.log('🎫 Event Title:', reservation.event.title)
+    console.log('🎫 Quantity:', reservation.quantity)
+
+    // Send confirmation email
+    if (reservation.user.email) {
+      console.log('🎫 User has email, triggering confirmation email...')
+      notificationService.sendReservationConfirmation(
+        reservation.user.email,
+        reservation.user.name || null,
+        reservation.event.title,
+        reservation.quantity,
+        {
+          location: reservation.event.location,
+          startTime: reservation.event.startTime,
+        }
+      ).catch((err) => {
+        console.error('🎫 ❌ Failed to send reservation confirmation:', err)
+        console.error('🎫 Error stack:', err.stack)
+      })
+    } else {
+      console.log('🎫 ⚠️  User has no email address, skipping confirmation email')
+    }
+
+    console.log('🎫 ===============================\n')
+    return reservation
   },
 
   async getUserReservations(userId: string) {

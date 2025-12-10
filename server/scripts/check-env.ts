@@ -87,6 +87,25 @@ const requiredVars = {
       if (!val) return { ok: true, message: 'Not set (Google OAuth will not work)' }
       return { ok: true, message: 'Set' }
     }
+  },
+  'RESEND_API_KEY': {
+    required: false,
+    description: 'Resend API key for email notifications',
+    check: (val: string) => {
+      if (!val) return { ok: true, message: 'Not set (email notifications will not work)' }
+      if (!val.startsWith('re_')) {
+        return { ok: false, message: 'Invalid format (should start with re_)' }
+      }
+      return { ok: true, message: 'Set' }
+    }
+  },
+  'RESEND_FROM_EMAIL': {
+    required: false,
+    description: 'Email address to send from (optional, defaults to onboarding@resend.dev)',
+    check: (val: string) => {
+      if (!val) return { ok: true, message: 'Not set (will default to onboarding@resend.dev)' }
+      return { ok: true, message: `Set to ${val}` }
+    }
   }
 }
 
