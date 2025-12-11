@@ -19,6 +19,7 @@ import dietaryRoutes from './routes/dietary.routes'
 import feedbackRoutes from './routes/feedback.routes'
 import notificationRoutes from './routes/notification.routes'
 import analyticsRoutes from './routes/analytics.routes'
+import adminRoutes from './routes/admin.routes'
 
 const app = express()
 const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
@@ -57,6 +58,7 @@ app.use('/api/dietary', dietaryRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/admin', adminRoutes)
 
 const port = process.env.PORT || 4000
 

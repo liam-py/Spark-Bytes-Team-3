@@ -10,6 +10,7 @@ import {
   Box,
   Alert,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import {
   BarChart,
@@ -123,6 +124,14 @@ export default function AnalyticsPage() {
               <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
                 {analytics.totalUsers}
               </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={() => router.push("/admin/users")}
+              >
+                Manage
+              </Button>
             </CardContent>
           </Card>
         </Grid>
@@ -186,4 +195,3 @@ export default function AnalyticsPage() {
     </Container>
   );
 }
-
