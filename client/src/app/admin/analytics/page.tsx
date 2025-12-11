@@ -24,6 +24,7 @@ import {
   Cell,
 } from "recharts";
 import { useRouter } from "next/navigation";
+import ManageUsersButton from "@/components/admin/ManageUsersButton";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -117,12 +118,17 @@ export default function AnalyticsPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
-                Total Users
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
-                {analytics.totalUsers}
-              </Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box>
+                  <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                    Total Users
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+                    {analytics.totalUsers}
+                  </Typography>
+                </Box>
+                <ManageUsersButton />
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -186,4 +192,3 @@ export default function AnalyticsPage() {
     </Container>
   );
 }
-
