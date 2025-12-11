@@ -19,42 +19,19 @@ export default function EventCard({ event }: { event: any }) {
     return new Date(dateString).toLocaleString();
   };
 
-<<<<<<< HEAD
   return (
-    <Card>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 2, transition: "all 0.2s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }}>
       {event.imagePath && (
         <CardMedia
           component="img"
           height="200"
           image={`${base}${event.imagePath}`}
           alt={event.title}
-        />
-      )}
-      <CardContent>
-        <Typography variant="h6" component="h2" gutterBottom>
-=======
-  const imageSrc = (() => {
-    if (event.image_url) return event.image_url;
-    if (!event.imagePath) return null;
-    return typeof event.imagePath === "string" && event.imagePath.startsWith("http")
-      ? event.imagePath
-      : `${base}${event.imagePath}`;
-  })();
-
-  return (
-    <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 2, transition: "all 0.2s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }}>
-      {imageSrc && (
-        <CardMedia
-          component="img"
-          height="200"
-          image={imageSrc}
-          alt={event.title}
           sx={{ objectFit: "cover" }}
         />
       )}
       <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
->>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
           {event.title}
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -63,20 +40,6 @@ export default function EventCard({ event }: { event: any }) {
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {formatDate(event.startTime)} - {formatDate(event.endTime)}
         </Typography>
-<<<<<<< HEAD
-        <Box sx={{ mt: 1, mb: 1 }}>
-          {event.foodItems?.map((item: any) => (
-            <Chip
-              key={item.id}
-              label={`${item.name} (${item.quantity - item.reserved}/${item.quantity})`}
-              size="small"
-              sx={{ mr: 0.5, mb: 0.5 }}
-            />
-          ))}
-        </Box>
-        <Link href={`/events/${event.id}`} style={{ textDecoration: "none" }}>
-          <Button variant="contained" fullWidth>
-=======
         <Box sx={{ mt: 1, mb: 2, flexGrow: 1 }}>
           {event.foodItems?.length > 0 ? (
             event.foodItems.map((item: any) => (
@@ -96,7 +59,6 @@ export default function EventCard({ event }: { event: any }) {
         </Box>
         <Link href={`/events/${event.id}`} style={{ textDecoration: "none" }}>
           <Button variant="contained" fullWidth sx={{ mt: "auto" }}>
->>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
             View Details
           </Button>
         </Link>
@@ -104,7 +66,4 @@ export default function EventCard({ event }: { event: any }) {
     </Card>
   );
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
