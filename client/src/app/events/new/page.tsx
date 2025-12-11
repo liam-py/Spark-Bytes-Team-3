@@ -57,7 +57,7 @@ export default function NewEventPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Create New Event
       </Typography>
-      <EventForm />
+      <EventForm user={user} />
     </Container>
   );
 }

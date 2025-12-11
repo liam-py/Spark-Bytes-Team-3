@@ -19,13 +19,21 @@ export default function EventCard({ event }: { event: any }) {
     return new Date(dateString).toLocaleString();
   };
 
+  const imageSrc = (() => {
+    if (event.image_url) return event.image_url;
+    if (!event.imagePath) return null;
+    return typeof event.imagePath === "string" && event.imagePath.startsWith("http")
+      ? event.imagePath
+      : `${base}${event.imagePath}`;
+  })();
+
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 2, transition: "all 0.2s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }}>
-      {event.imagePath && (
+      {imageSrc && (
         <CardMedia
           component="img"
           height="200"
-          image={`${base}${event.imagePath}`}
+          image={imageSrc}
           alt={event.title}
           sx={{ objectFit: "cover" }}
         />
@@ -66,4 +74,3 @@ export default function EventCard({ event }: { event: any }) {
     </Card>
   );
 }
-
