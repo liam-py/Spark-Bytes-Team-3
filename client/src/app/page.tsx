@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD
+import { Typography, Button, Box, Container, Grid } from "@mui/material";
+=======
 import { Typography, Button, Box, Container, Grid, CircularProgress, Alert } from "@mui/material";
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
@@ -12,7 +16,10 @@ export default function Home() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
+<<<<<<< HEAD
+=======
   const [loading, setLoading] = useState(true);
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 
   useEffect(() => {
     fetchUser();
@@ -20,12 +27,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
+=======
     if (user !== null && events.length >= 0) {
       setLoading(false);
     }
   }, [user, events]);
 
   useEffect(() => {
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     // Redirect admins to admin dashboard
     if (user?.role === "ADMIN") {
       router.push("/admin/analytics");
@@ -51,8 +61,11 @@ export default function Home() {
       setEvents(data.slice(0, 6)); // Show first 6 events
     } catch {
       setEvents([]);
+<<<<<<< HEAD
+=======
     } finally {
       setLoading(false);
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     }
   };
 
@@ -61,6 +74,8 @@ export default function Home() {
     return null;
   }
 
+<<<<<<< HEAD
+=======
   if (loading) {
     return (
       <Box
@@ -76,6 +91,7 @@ export default function Home() {
     );
   }
 
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
   if (!user) {
     return (
       <Box
@@ -107,6 +123,13 @@ export default function Home() {
       <Typography variant="h4" component="h1" gutterBottom>
         Welcome back, {user.name || user.email}!
       </Typography>
+<<<<<<< HEAD
+      <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 2 }}>
+        Featured Events
+      </Typography>
+      {events.length === 0 ? (
+        <Typography>No events available</Typography>
+=======
       <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 2, fontWeight: 600 }}>
         Featured Events
       </Typography>
@@ -114,6 +137,7 @@ export default function Home() {
         <Alert severity="info" sx={{ mt: 2 }}>
           No events available at the moment. Check back later!
         </Alert>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       ) : (
         <Grid container spacing={3} sx={{ mt: 2 }}>
           {events.map((event) => (

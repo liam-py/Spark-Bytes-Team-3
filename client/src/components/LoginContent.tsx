@@ -1,10 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
+<<<<<<< HEAD
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Alert,
+  Snackbar,
+  Divider,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useGoogleLogin } from "@react-oauth/google";
+=======
 import { TextField, Button, Typography, Box, Alert, Snackbar, Divider } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/app/providers/AuthProvider";
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -16,7 +30,10 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+<<<<<<< HEAD
+=======
   const { refreshUser } = useAuth();
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +62,10 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
       }
 
       setSuccess(true);
+<<<<<<< HEAD
+=======
       await refreshUser(); // refresh global auth provider
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       setTimeout(() => {
         // Redirect based on role
         if (data.user?.role === "ADMIN") {
@@ -65,6 +85,11 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
     setError("");
 
     try {
+<<<<<<< HEAD
+      // The redirect URI must match exactly what's in Google Cloud Console
+      // For @react-oauth/google with auth-code flow, it uses the current origin
+=======
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       const redirectUri = window.location.origin;
       
       console.log('Google OAuth response:', {
@@ -100,7 +125,10 @@ export default function LoginContent({ userType = "student" }: { userType?: "stu
       }
 
       setSuccess(true);
+<<<<<<< HEAD
+=======
       await refreshUser(); // refresh global auth provider
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       setTimeout(() => {
         if (data.user?.role === "ADMIN") {
           router.push("/admin/analytics");

@@ -45,10 +45,12 @@ export default function AnalyticsPage() {
       const res = await fetch(`${base}/api/analytics/overview`, {
         credentials: "include",
       });
+
       if (res.status === 401 || res.status === 403) {
         router.push("/");
         return;
       }
+
       const data = await res.json();
       setAnalytics(data);
     } catch {
@@ -60,7 +62,10 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+      <Container
+        maxWidth="lg"
+        sx={{ py: 4, display: "flex", justifyContent: "center" }}
+      >
         <CircularProgress />
       </Container>
     );
@@ -77,7 +82,10 @@ export default function AnalyticsPage() {
   }
 
   const pieData = [
-    { name: "With Dietary Options", value: analytics.eventsWithDietaryOptions },
+    {
+      name: "With Dietary Options",
+      value: analytics.eventsWithDietaryOptions,
+    },
     {
       name: "Without Dietary Options",
       value: analytics.totalEvents - analytics.eventsWithDietaryOptions,
@@ -86,7 +94,12 @@ export default function AnalyticsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{ fontWeight: 600, mb: 3 }}
+      >
         Analytics Dashboard
       </Typography>
 
@@ -94,36 +107,63 @@ export default function AnalyticsPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+              <Typography
+                color="text.secondary"
+                gutterBottom
+                variant="body2"
+                sx={{ fontWeight: 500 }}
+              >
                 Total Events
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 600, color: "primary.main" }}
+              >
                 {analytics.totalEvents}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+              <Typography
+                color="text.secondary"
+                gutterBottom
+                variant="body2"
+                sx={{ fontWeight: 500 }}
+              >
                 Total Reservations
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 600, color: "primary.main" }}
+              >
                 {analytics.totalReservations}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+              <Typography
+                color="text.secondary"
+                gutterBottom
+                variant="body2"
+                sx={{ fontWeight: 500 }}
+              >
                 Total Users
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 600, color: "primary.main" }}
+              >
                 {analytics.totalUsers}
               </Typography>
+              {/* 👇 这是你自己的 Manage 按钮 */}
               <Button
                 variant="outlined"
                 size="small"
@@ -135,13 +175,22 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ boxShadow: 2, height: "100%" }}>
             <CardContent>
-              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+              <Typography
+                color="text.secondary"
+                gutterBottom
+                variant="body2"
+                sx={{ fontWeight: 500 }}
+              >
                 Events with Dietary Options
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 600, color: "primary.main" }}
+              >
                 {analytics.eventsWithDietaryOptions}
               </Typography>
             </CardContent>
@@ -150,7 +199,11 @@ export default function AnalyticsPage() {
       </Grid>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ fontWeight: 600, mb: 2 }}
+        >
           Events by Organizer
         </Typography>
         <BarChart
@@ -169,7 +222,11 @@ export default function AnalyticsPage() {
       </Box>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ fontWeight: 600, mb: 2 }}
+        >
           Events with Dietary Options
         </Typography>
         <PieChart width={400} height={300}>
@@ -186,7 +243,10 @@ export default function AnalyticsPage() {
             dataKey="value"
           >
             {pieData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip />

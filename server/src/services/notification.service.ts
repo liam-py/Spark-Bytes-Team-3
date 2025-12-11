@@ -1,5 +1,17 @@
 import { prisma } from '../lib/db'
 import { userRepo } from '../repositories/user.repo'
+<<<<<<< HEAD
+
+export const notificationService = {
+  async sendEventNotification(eventId: string, eventTitle: string) {
+    // Get all users who have notifications enabled
+    const users = await prisma.user.findMany({
+      where: {
+        notificationEnabled: true,
+      },
+      select: {
+        id: true,
+=======
 import { sendEmail } from '../lib/email'
 
 export const notificationService = {
@@ -24,11 +36,24 @@ export const notificationService = {
         role: 'STUDENT',
       },
       select: {
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
         email: true,
         name: true,
       },
     })
 
+<<<<<<< HEAD
+    // In a real implementation, you would send emails here
+    // For now, we'll just log the notifications
+    console.log(`Sending notifications to ${users.length} users about event: ${eventTitle}`)
+    
+    // TODO: Integrate with email service (SendGrid/Resend)
+    // for (const user of users) {
+    //   await sendEmail(user.email, `New event: ${eventTitle}`, ...)
+    // }
+
+    return { notified: users.length }
+=======
     console.log('🔔 Found students:', users.length)
     console.log('🔔 Student emails:', users.map(u => u.email))
 
@@ -126,6 +151,7 @@ export const notificationService = {
     await sendEmail(userEmail, subject, html, text)
     console.log('✉️  ✅ Email send completed')
     console.log('✉️  =========================================\n')
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
   },
 
   async updateNotificationPreference(userId: string, enabled: boolean) {

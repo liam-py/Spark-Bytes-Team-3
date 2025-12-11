@@ -92,6 +92,8 @@ export const reservationRepo = {
       data: { status },
     })
   },
+<<<<<<< HEAD
+=======
 
   findByFoodItemAndUser: (foodItemId: string, userId: string) => {
     return prisma.reservation.findFirst({
@@ -102,5 +104,6 @@ export const reservationRepo = {
       },
     });
   }
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 }
 
