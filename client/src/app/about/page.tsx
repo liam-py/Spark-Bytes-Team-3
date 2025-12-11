@@ -128,7 +128,7 @@ export default function AboutPage() {
               >
                 <Typography sx={{ mb: 1 }}>• Browse campus food events</Typography>
                 <Typography sx={{ mb: 1 }}>• Filter by dietary preferences</Typography>
-                <Typography sx={{ mb: 1 }}>• Reserve available food</Typography>
+                <Typography sx={{ mb: 1 }}>• Reserve available food </Typography>
                 <Typography sx={{ mb: 1 }}>• Leave feedback</Typography>
                 <Typography sx={{ mb: 1 }}>• Organizers can manage events</Typography>
               </Box>
