@@ -4,9 +4,12 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Grid,
+<<<<<<< HEAD
   Card,
   CardContent,
   CardMedia,
+=======
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
   Typography,
   Button,
   Box,
@@ -16,10 +19,17 @@ import {
   Select,
   MenuItem,
   Chip,
+<<<<<<< HEAD
   Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+=======
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 import Link from "next/link";
 import EventCard from "@/components/EventCard";
 
@@ -100,6 +110,7 @@ export default function EventsPage() {
   const isAdmin = user?.role === "ADMIN";
 
   return (
+<<<<<<< HEAD
     <>
       {/* Admin CTA Banner */}
       {isAdmin && (
@@ -176,6 +187,37 @@ export default function EventsPage() {
             </Typography>
           )}
         </Box>
+=======
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+          Browse Events
+        </Typography>
+        {isAdmin && (
+          <Link href="/events/new" style={{ textDecoration: "none" }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                py: 1.5,
+                boxShadow: 2,
+                "&:hover": {
+                  boxShadow: 4,
+                  transform: "translateY(-2px)",
+                },
+                transition: "all 0.2s ease-in-out",
+              }}
+            >
+              Create Event
+            </Button>
+          </Link>
+        )}
+      </Box>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 
       <Box sx={{ mb: 4, display: "flex", gap: 2, flexWrap: "wrap" }}>
         <TextField
@@ -223,9 +265,19 @@ export default function EventsPage() {
       </Box>
 
       {loading ? (
+<<<<<<< HEAD
         <Typography>Loading...</Typography>
       ) : events.length === 0 ? (
         <Typography>No events found</Typography>
+=======
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : events.length === 0 ? (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          No events found matching your criteria. Try adjusting your filters.
+        </Alert>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       ) : (
         <Grid container spacing={3}>
           {events.map((event) => (
@@ -235,8 +287,12 @@ export default function EventsPage() {
           ))}
         </Grid>
       )}
+<<<<<<< HEAD
       </Container>
     </>
+=======
+    </Container>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
   );
 }
 

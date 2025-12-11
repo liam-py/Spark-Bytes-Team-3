@@ -12,6 +12,10 @@ import {
   Switch,
   FormControlLabel,
   Alert,
+<<<<<<< HEAD
+=======
+  CircularProgress,
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import DietaryPreferencesForm from "@/components/DietaryPreferencesForm";
@@ -49,14 +53,20 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
+<<<<<<< HEAD
       <Container>
         <Typography>Loading...</Typography>
+=======
+      <Container maxWidth="md" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+        <CircularProgress />
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       </Container>
     );
   }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+<<<<<<< HEAD
       <Typography variant="h4" component="h1" gutterBottom>
         Profile
       </Typography>
@@ -74,6 +84,25 @@ export default function ProfilePage() {
           {user.isOrganizer && (
             <Alert severity="info" sx={{ mt: 2 }}>
               You are a verified organizer
+=======
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+        Profile
+      </Typography>
+      <Card sx={{ boxShadow: 2, mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+            {user.name || user.email}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <strong>Email:</strong> {user.email}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <strong>Role:</strong> {user.role}
+          </Typography>
+          {user.isOrganizer && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              You are a verified organizer and can create events.
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
             </Alert>
           )}
         </CardContent>

@@ -29,11 +29,31 @@ export const eventService = {
       createdBy: userId,
     })
 
+<<<<<<< HEAD
     // Send notifications to users who opted in
     notificationService.sendEventNotification(event.id, event.title).catch((err) => {
       console.error('Failed to send notifications:', err)
     })
 
+=======
+    console.log('\n🎉 ===== EVENT CREATED =====')
+    console.log('🎉 Event ID:', event.id)
+    console.log('🎉 Event Title:', event.title)
+    console.log('🎉 Created by User ID:', userId)
+    console.log('🎉 Triggering notifications...')
+
+    // Send notifications with event details
+    notificationService.sendEventNotification(event.id, event.title, {
+      location: event.location,
+      startTime: event.startTime,
+      description: event.description || undefined,
+    }).catch((err) => {
+      console.error('🎉 ❌ Failed to send event notifications:', err)
+      console.error('🎉 Error stack:', err.stack)
+    })
+
+    console.log('🎉 =========================\n')
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     return event
   },
 
