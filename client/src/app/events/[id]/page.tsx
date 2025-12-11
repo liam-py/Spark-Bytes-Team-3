@@ -235,16 +235,23 @@ export default function EventDetailPage() {
   const isAdmin = user?.role === "ADMIN";
   const isStudent = user && user.role !== "ADMIN";
   const canEdit = isAdmin || (user && event.createdBy === user.id);
+  const imageSrc = (() => {
+    if (event.image_url) return event.image_url;
+    if (!event.imagePath) return null;
+    return typeof event.imagePath === "string" && event.imagePath.startsWith("http")
+      ? event.imagePath
+      : `${base}${event.imagePath}`;
+  })();
   const isEventCreator = user && event.createdBy === user.id;
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Event Image */}
-      {event.imagePath && (
+      {imageSrc && (
         <CardMedia
           component="img"
           height="400"
-          image={`${base}${event.imagePath}`}
+          image={imageSrc}
           alt={event.title}
           sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}
         />
