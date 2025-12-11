@@ -9,8 +9,10 @@ import {
   Grid,
   Box,
   Alert,
+<<<<<<< HEAD
+=======
   CircularProgress,
-  Button,
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
 } from "@mui/material";
 import {
   BarChart,
@@ -45,12 +47,10 @@ export default function AnalyticsPage() {
       const res = await fetch(`${base}/api/analytics/overview`, {
         credentials: "include",
       });
-
       if (res.status === 401 || res.status === 403) {
         router.push("/");
         return;
       }
-
       const data = await res.json();
       setAnalytics(data);
     } catch {
@@ -62,11 +62,13 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <Container
-        maxWidth="lg"
-        sx={{ py: 4, display: "flex", justifyContent: "center" }}
-      >
+<<<<<<< HEAD
+      <Container>
+        <Typography>Loading...</Typography>
+=======
+      <Container maxWidth="lg" sx={{ py: 4, display: "flex", justifyContent: "center" }}>
         <CircularProgress />
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       </Container>
     );
   }
@@ -82,10 +84,7 @@ export default function AnalyticsPage() {
   }
 
   const pieData = [
-    {
-      name: "With Dietary Options",
-      value: analytics.eventsWithDietaryOptions,
-    },
+    { name: "With Dietary Options", value: analytics.eventsWithDietaryOptions },
     {
       name: "Without Dietary Options",
       value: analytics.totalEvents - analytics.eventsWithDietaryOptions,
@@ -94,103 +93,94 @@ export default function AnalyticsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        gutterBottom
-        sx={{ fontWeight: 600, mb: 3 }}
-      >
+<<<<<<< HEAD
+      <Typography variant="h4" component="h1" gutterBottom>
+=======
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
         Analytics Dashboard
       </Typography>
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ boxShadow: 2, height: "100%" }}>
+<<<<<<< HEAD
+          <Card>
             <CardContent>
-              <Typography
-                color="text.secondary"
-                gutterBottom
-                variant="body2"
-                sx={{ fontWeight: 500 }}
-              >
+              <Typography color="text.secondary" gutterBottom>
                 Total Events
               </Typography>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 600, color: "primary.main" }}
-              >
+              <Typography variant="h4">{analytics.totalEvents}</Typography>
+=======
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
+            <CardContent>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                Total Events
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
                 {analytics.totalEvents}
               </Typography>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ boxShadow: 2, height: "100%" }}>
+<<<<<<< HEAD
+          <Card>
             <CardContent>
-              <Typography
-                color="text.secondary"
-                gutterBottom
-                variant="body2"
-                sx={{ fontWeight: 500 }}
-              >
+              <Typography color="text.secondary" gutterBottom>
                 Total Reservations
               </Typography>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 600, color: "primary.main" }}
-              >
+              <Typography variant="h4">{analytics.totalReservations}</Typography>
+=======
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
+            <CardContent>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                Total Reservations
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
                 {analytics.totalReservations}
               </Typography>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ boxShadow: 2, height: "100%" }}>
+<<<<<<< HEAD
+          <Card>
             <CardContent>
-              <Typography
-                color="text.secondary"
-                gutterBottom
-                variant="body2"
-                sx={{ fontWeight: 500 }}
-              >
+              <Typography color="text.secondary" gutterBottom>
                 Total Users
               </Typography>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 600, color: "primary.main" }}
-              >
+              <Typography variant="h4">{analytics.totalUsers}</Typography>
+=======
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
+            <CardContent>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                Total Users
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
                 {analytics.totalUsers}
               </Typography>
-              {/* 👇 这是你自己的 Manage 按钮 */}
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{ mt: 2 }}
-                onClick={() => router.push("/admin/users")}
-              >
-                Manage
-              </Button>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ boxShadow: 2, height: "100%" }}>
+<<<<<<< HEAD
+          <Card>
             <CardContent>
-              <Typography
-                color="text.secondary"
-                gutterBottom
-                variant="body2"
-                sx={{ fontWeight: 500 }}
-              >
+              <Typography color="text.secondary" gutterBottom>
                 Events with Dietary Options
               </Typography>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: 600, color: "primary.main" }}
-              >
+              <Typography variant="h4">
+=======
+          <Card sx={{ boxShadow: 2, height: "100%" }}>
+            <CardContent>
+              <Typography color="text.secondary" gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                Events with Dietary Options
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: "primary.main" }}>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
                 {analytics.eventsWithDietaryOptions}
               </Typography>
             </CardContent>
@@ -199,11 +189,11 @@ export default function AnalyticsPage() {
       </Grid>
 
       <Box sx={{ mt: 4 }}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{ fontWeight: 600, mb: 2 }}
-        >
+<<<<<<< HEAD
+        <Typography variant="h6" gutterBottom>
+=======
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
           Events by Organizer
         </Typography>
         <BarChart
@@ -222,11 +212,11 @@ export default function AnalyticsPage() {
       </Box>
 
       <Box sx={{ mt: 4 }}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{ fontWeight: 600, mb: 2 }}
-        >
+<<<<<<< HEAD
+        <Typography variant="h6" gutterBottom>
+=======
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
           Events with Dietary Options
         </Typography>
         <PieChart width={400} height={300}>
@@ -243,10 +233,7 @@ export default function AnalyticsPage() {
             dataKey="value"
           >
             {pieData.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip />
@@ -255,3 +242,4 @@ export default function AnalyticsPage() {
     </Container>
   );
 }
+
