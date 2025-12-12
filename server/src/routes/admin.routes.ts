@@ -5,8 +5,9 @@ import { requireAdmin } from '../middleware/role.middleware'
 
 const router = Router()
 
-router.get('/users', requireAuth, requireAdmin, adminUserController.list)
-router.get('/users/:id', requireAuth, requireAdmin, adminUserController.getById)
-router.delete('/users/:id', requireAuth, requireAdmin, adminUserController.delete)
+router.get('/', requireAuth, requireAdmin, adminUserController.listUsers)
+router.get('/:id/details', requireAuth, requireAdmin, adminUserController.getUserDetails)
+router.patch('/:id/role', requireAuth, requireAdmin, adminUserController.updateUserRole)
+router.delete('/:id', requireAuth, requireAdmin, adminUserController.deleteUser)
 
 export default router

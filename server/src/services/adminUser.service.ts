@@ -1,30 +1,45 @@
 import { prisma } from '../lib/db'
+import { UserRole } from '@prisma/client'
+
+type AllowedRole = Extract<UserRole, 'ADMIN' | 'STUDENT'>
+
+const validRoles: AllowedRole[] = ['ADMIN', 'STUDENT']
+
+const ensureValidRole = (role: string): role is AllowedRole => {
+  return validRoles.includes(role as AllowedRole)
+}
 
 export const adminUserService = {
   async listUsers() {
-    const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        _count: {
-          select: {
-            events: true,
-            reservations: true,
-          },
+    const [users, eventCounts, reservationCounts] = await Promise.all([
+      prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
         },
-      },
-    })
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.event.groupBy({
+        by: ['createdBy'],
+        _count: { id: true },
+      }),
+      prisma.reservation.groupBy({
+        by: ['userId'],
+        _count: { id: true },
+      }),
+    ])
+
+    const eventCountMap = new Map(eventCounts.map((item) => [item.createdBy, item._count.id]))
+    const reservationCountMap = new Map(
+      reservationCounts.map((item) => [item.userId, item._count.id])
+    )
 
     return users.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      createdEventsCount: user._count.events,
-      reservationsCount: user._count.reservations,
+      ...user,
+      createdEventsCount: eventCountMap.get(user.id) || 0,
+      reservationsCount: reservationCountMap.get(user.id) || 0,
     }))
   },
 
@@ -36,66 +51,96 @@ export const adminUserService = {
         name: true,
         email: true,
         role: true,
-        events: {
-          select: {
-            id: true,
-            title: true,
-          },
-          orderBy: { startTime: 'desc' },
-        },
-        reservations: {
-          select: {
-            id: true,
-            eventId: true,
-            status: true,
-            reservedAt: true,
-            event: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-          orderBy: { reservedAt: 'desc' },
-        },
-        _count: {
-          select: {
-            events: true,
-            reservations: true,
-          },
-        },
       },
     })
 
-    if (!user) return null
+    if (!user) {
+      throw new Error('USER_NOT_FOUND')
+    }
+
+    const [createdEvents, reservations] = await Promise.all([
+      prisma.event.findMany({
+        where: { createdBy: userId },
+        select: {
+          id: true,
+          title: true,
+          location: true,
+          startTime: true,
+          endTime: true,
+        },
+        orderBy: { startTime: 'desc' },
+      }),
+      prisma.reservation.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          eventId: true,
+          reservedAt: true,
+          event: {
+            select: {
+              title: true,
+            },
+          },
+        },
+        orderBy: { reservedAt: 'desc' },
+      }),
+    ])
 
     return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      createdEventsCount: user._count.events,
-      reservationsCount: user._count.reservations,
-      createdEvents: user.events,
-      reservations: user.reservations.map((reservation) => ({
+      ...user,
+      createdEventsCount: createdEvents.length,
+      reservationsCount: reservations.length,
+      createdEvents,
+      reservations: reservations.map((reservation) => ({
         id: reservation.id,
         eventId: reservation.eventId,
-        eventTitle: reservation.event?.title || 'Unknown event',
-        status: reservation.status,
-        reservedAt: reservation.reservedAt,
+        eventTitle: reservation.event.title,
+        createdAt: reservation.reservedAt,
       })),
     }
   },
 
-  async deleteUserAndData(userId: string) {
-    return prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({
-        where: { id: userId },
-        select: { id: true },
-      })
+  async updateUserRole(userId: string, role: string) {
+    if (!ensureValidRole(role)) {
+      throw new Error('INVALID_ROLE')
+    }
 
-      if (!existing) {
-        throw new Error('NOT_FOUND')
+    return prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: userId } })
+      if (!user) {
+        throw new Error('USER_NOT_FOUND')
+      }
+
+      if (user.role === role) {
+        return user
+      }
+
+      if (user.role === 'ADMIN' && role !== 'ADMIN') {
+        const adminCount = await tx.user.count({ where: { role: 'ADMIN' } })
+        if (adminCount <= 1) {
+          throw new Error('LAST_ADMIN')
+        }
+      }
+
+      return tx.user.update({
+        where: { id: userId },
+        data: { role: role as AllowedRole },
+      })
+    })
+  },
+
+  async deleteUser(userId: string) {
+    return prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({ where: { id: userId } })
+      if (!user) {
+        throw new Error('USER_NOT_FOUND')
+      }
+
+      if (user.role === 'ADMIN') {
+        const adminCount = await tx.user.count({ where: { role: 'ADMIN' } })
+        if (adminCount <= 1) {
+          throw new Error('LAST_ADMIN')
+        }
       }
 
       const events = await tx.event.findMany({
@@ -108,21 +153,15 @@ export const adminUserService = {
         await tx.reservation.deleteMany({
           where: { eventId: { in: eventIds } },
         })
-        await tx.feedback.deleteMany({
-          where: { eventId: { in: eventIds } },
-        })
-      }
-
-      await tx.reservation.deleteMany({ where: { userId } })
-      await tx.feedback.deleteMany({ where: { userId } })
-
-      if (eventIds.length > 0) {
         await tx.event.deleteMany({
           where: { id: { in: eventIds } },
         })
       }
 
+      await tx.reservation.deleteMany({ where: { userId } })
       await tx.user.delete({ where: { id: userId } })
+
+      return { deletedUserId: userId }
     })
   },
 }

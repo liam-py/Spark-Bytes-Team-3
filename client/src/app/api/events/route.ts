@@ -1,100 +1,126 @@
 import { NextResponse } from "next/server";
+import { Buffer } from "buffer";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
-import { eventImagesBucket, supabaseAdmin } from "@/lib/supabaseAdmin";
+const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+const storageBucket =
+  process.env.SUPABASE_STORAGE_BUCKET ||
+  process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET ||
+  "event-images";
 
-export const runtime = "nodejs";
+const buildImagePath = (fileName: string) => `events/${fileName}`;
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
-const ALLOWED_MIME = ["image/jpeg", "image/png", "image/jpg"];
+const uploadImage = async (file: File) => {
+  if (!storageBucket) {
+    throw new Error("STORAGE_BUCKET_NOT_CONFIGURED");
+  }
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const fileExt = file.name.split(".").pop() || "jpg";
+  const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+  const filePath = buildImagePath(safeName);
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error } = await supabaseAdmin.storage
+    .from(storageBucket)
+    .upload(filePath, buffer, { contentType: file.type || "image/jpeg" });
+
+  if (error) {
+    console.error("[events/upload] Failed to upload image:", error.message);
+    throw new Error("IMAGE_UPLOAD_FAILED");
+  }
+
+  return filePath;
+};
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
+    const title = (formData.get("title") as string) || "";
+    const description = (formData.get("description") as string) || "";
+    const location = (formData.get("location") as string) || "";
+    const startTime = (formData.get("startTime") as string) || "";
+    const endTime = (formData.get("endTime") as string) || "";
+    const foodItemsRaw = formData.get("foodItems") as string | null;
+    const image = formData.get("image");
 
-    const title = formData.get("title")?.toString().trim();
-    const description = formData.get("description")?.toString().trim() || null;
-    const location = formData.get("location")?.toString().trim();
-    const startTimeRaw = formData.get("startTime")?.toString();
-    const endTimeRaw = formData.get("endTime")?.toString();
-    const createdBy = formData.get("createdBy")?.toString();
-    // foodItems are currently ignored because the Supabase Event table schema does not include them
-
-    if (!title || !location || !startTimeRaw || !endTimeRaw) {
-      return NextResponse.json(
-        { error: "Missing required fields: title, location, startTime, endTime" },
-        { status: 400 }
-      );
+    if (!title || !location || !startTime || !endTime) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const startTime = new Date(startTimeRaw);
-    const endTime = new Date(endTimeRaw);
-    if (Number.isNaN(startTime.getTime()) || Number.isNaN(endTime.getTime())) {
-      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return NextResponse.json({ error: "Invalid start or end time" }, { status: 400 });
+    }
+    if (endDate <= startDate) {
+      return NextResponse.json({ error: "End time must be after start time" }, { status: 400 });
     }
 
-    let imageUrl: string | null = null;
-    let storagePath: string | null = null;
+    let foodItems: any[] = [];
+    if (foodItemsRaw) {
+      try {
+        foodItems = JSON.parse(foodItemsRaw);
+      } catch (e) {
+        return NextResponse.json({ error: "Invalid food items payload" }, { status: 400 });
+      }
+    }
 
-    const maybeFile = formData.get("image");
-    if (maybeFile instanceof File && maybeFile.size > 0) {
-      if (maybeFile.size > MAX_IMAGE_BYTES) {
+    let imagePath: string | null = null;
+    let uploadedImagePath: string | null = null;
+    if (image instanceof File && image.size > 0) {
+      if (image.size > 5 * 1024 * 1024) {
         return NextResponse.json({ error: "Image must be under 5MB" }, { status: 400 });
       }
-      if (!ALLOWED_MIME.includes(maybeFile.type)) {
-        return NextResponse.json({ error: "Only JPEG or PNG images are allowed" }, { status: 400 });
+      if (!image.type.startsWith("image/")) {
+        return NextResponse.json({ error: "Invalid image type" }, { status: 400 });
       }
-
-      const extension = maybeFile.name?.split(".").pop()?.toLowerCase() || "jpg";
-      const fileName = `events/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-      const buffer = Buffer.from(await maybeFile.arrayBuffer());
-
-      const { data: uploaded, error: uploadError } = await supabaseAdmin.storage
-        .from(eventImagesBucket)
-        .upload(fileName, buffer, {
-          contentType: maybeFile.type || "application/octet-stream",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        return NextResponse.json({ error: uploadError.message }, { status: 400 });
-      }
-
-      storagePath = uploaded?.path ?? fileName;
-      const { data: publicUrlData } = supabaseAdmin.storage
-        .from(eventImagesBucket)
-        .getPublicUrl(storagePath);
-      imageUrl = publicUrlData.publicUrl;
+      uploadedImagePath = await uploadImage(image);
+      imagePath = uploadedImagePath;
     }
 
-    if (!createdBy) {
-      return NextResponse.json({ error: "Missing createdBy" }, { status: 400 });
-    }
-
-    const payload: Record<string, any> = {
-      id: crypto.randomUUID(),
+    const payload = {
       title,
       description,
       location,
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-      imagePath: imageUrl || storagePath,
-      createdBy,
-      updatedAt: new Date().toISOString(),
+      startTime,
+      endTime,
+      imagePath: imagePath || undefined,
+      foodItems,
     };
 
-    const { data: event, error: insertError } = await supabaseAdmin
-      .from("Event")
-      .insert(payload)
-      .select()
-      .single();
+    const backendResponse = await fetch(`${apiBase}/api/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: req.headers.get("cookie") || "",
+      },
+      body: JSON.stringify(payload),
+    });
 
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 400 });
+    const data = await backendResponse.json().catch(() => null);
+
+    if (!backendResponse.ok) {
+      if (uploadedImagePath) {
+        // Attempt cleanup for orphaned uploads
+        await getSupabaseAdmin().storage
+          .from(storageBucket || "")
+          .remove([uploadedImagePath])
+          .catch(() => {});
+      }
+      const errorMessage = data?.error || "Failed to create event";
+      return NextResponse.json({ error: errorMessage }, { status: backendResponse.status });
     }
 
-    return NextResponse.json(event, { status: 201 });
-  } catch (error) {
-    console.error("Error creating event with image:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return NextResponse.json(data, { status: 201 });
+  } catch (e: any) {
+    const message = e?.message === "IMAGE_UPLOAD_FAILED"
+      ? "Failed to upload image"
+      : e?.message === "STORAGE_BUCKET_NOT_CONFIGURED"
+        ? "Storage bucket not configured"
+        : "Failed to create event";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

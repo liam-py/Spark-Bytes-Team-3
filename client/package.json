@@ -15,15 +15,6 @@
     "@mui/material": "^5.15.15",
     "@prisma/client": "^6.18.0",
     "@react-oauth/google": "^0.12.2",
-<<<<<<< HEAD
-    "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2",
-    "next": "^14.2.33",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "recharts": "^2.12.7",
-    "swiper": "^9.4.1",
-=======
     "@supabase/supabase-js": "^2.87.1",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
@@ -31,7 +22,6 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "recharts": "^2.12.7",
->>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -40,11 +30,7 @@
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "eslint": "8.57.0",
-<<<<<<< HEAD
-    "eslint-config-next": "^16.0.8",
-=======
     "eslint-config-next": "14.2.15",
->>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     "prisma": "^6.18.0",
     "typescript": "^5"
   }
