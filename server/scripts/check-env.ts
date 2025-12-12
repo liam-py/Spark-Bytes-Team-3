@@ -87,6 +87,8 @@ const requiredVars = {
       if (!val) return { ok: true, message: 'Not set (Google OAuth will not work)' }
       return { ok: true, message: 'Set' }
     }
+<<<<<<< HEAD
+=======
   },
   'RESEND_API_KEY': {
     required: false,
@@ -106,6 +108,7 @@ const requiredVars = {
       if (!val) return { ok: true, message: 'Not set (will default to onboarding@resend.dev)' }
       return { ok: true, message: `Set to ${val}` }
     }
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
   }
 }
 

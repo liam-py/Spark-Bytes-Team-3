@@ -6,7 +6,10 @@ import { userRepo } from '../repositories/user.repo'
 
 export const reservationController = {
   create: async (req: AuthRequest, res: Response) => {
+<<<<<<< HEAD
+=======
     console.log("REQ BODY:", req.body);
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     try {
       if (!req.userId) {
         return res.status(401).json({ error: 'Authentication required' })
@@ -37,9 +40,12 @@ export const reservationController = {
       if (e.message === 'INSUFFICIENT_QUANTITY' || e.message === 'NO_AVAILABLE_FOOD') {
         return res.status(400).json({ error: 'No food available. Reservations closed.' })
       }
+<<<<<<< HEAD
+=======
       if (e.message === 'CANNOT_RESERVE_OWN_EVENT') {
         return res.status(403).json({ error: 'You cannot reserve food from your own event.' })
       }
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
       res.status(400).json({ error: e.message || 'Failed to create reservation' })
     }
   },

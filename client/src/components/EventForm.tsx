@@ -7,7 +7,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Chip,
   Alert,
   Snackbar,
   FormControl,
@@ -41,44 +40,24 @@ const BU_LOCATIONS = [
   "Other",
 ];
 
-export default function EventForm() {
+export default function EventForm({ user }: { user: { id: string } }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
   const [locationType, setLocationType] = useState("");
+  const [location, setLocation] = useState("");
   const [customLocation, setCustomLocation] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [foodItems, setFoodItems] = useState([
-    { name: "", description: "", quantity: 1, dietaryInfo: [] as string[] },
+    { name: "", description: "", quantity: 1 },
   ]);
+
   const [error, setError] = useState("");
-  const [imageError, setImageError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const addFoodItem = () => {
-    setFoodItems([
-      ...foodItems,
-      { name: "", description: "", quantity: 1, dietaryInfo: [] },
-    ]);
-  };
-
-  const removeFoodItem = (index: number) => {
-    setFoodItems(foodItems.filter((_, i) => i !== index));
-  };
-
-  const updateFoodItem = (
-    index: number,
-    field: string,
-    value: any
-  ) => {
-    const updated = [...foodItems];
-    updated[index] = { ...updated[index], [field]: value };
-    setFoodItems(updated);
-  };
 
   const handleLocationChange = (value: string) => {
     setLocationType(value);
@@ -90,57 +69,62 @@ export default function EventForm() {
     }
   };
 
+  const addFoodItem = () => {
+    setFoodItems([
+      ...foodItems,
+      { name: "", description: "", quantity: 1 },
+    ]);
+  };
+
+  const removeFoodItem = (index: number) => {
+    setFoodItems(foodItems.filter((_, i) => i !== index));
+  };
+
+  const updateFoodItem = (index: number, field: string, value: any) => {
+    const updated = [...foodItems];
+    updated[index] = { ...updated[index], [field]: value };
+    setFoodItems(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setImageError("");
     setLoading(true);
 
-    // Determine final location value
-    const finalLocation = locationType === "Other" ? customLocation : location;
-    
+    const finalLocation =
+      locationType === "Other" ? customLocation : location;
+
     if (!finalLocation) {
-      setError("Please enter a location");
+      setError("Please enter a location.");
       setLoading(false);
       return;
     }
 
-    const startDate = new Date(startTime);
-    const endDate = new Date(endTime);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      setError("Please provide valid start and end times");
-      setLoading(false);
-      return;
-    }
-    if (endDate <= startDate) {
-      setError("End time must be after start time");
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (end <= start) {
+      setError("End time must be after start time.");
       setLoading(false);
       return;
     }
 
-    // Build multipart form data
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("location", finalLocation);
-    formData.append("startTime", new Date(startTime).toISOString());
-    formData.append("endTime", new Date(endTime).toISOString());
+    formData.append("startTime", start.toISOString());
+    formData.append("endTime", end.toISOString());
     formData.append(
       "foodItems",
-      JSON.stringify(foodItems.filter((item) => item.name))
+      JSON.stringify(foodItems.filter((i) => i.name))
     );
 
+    if (user?.id) {
+      formData.append("createdBy", user.id);
+    }
+
     if (imageFile) {
-      if (!imageFile.type.match(/^image\//)) {
-        setImageError("Invalid image type");
-        setLoading(false);
-        return;
-      }
-      if (imageFile.size > 5 * 1024 * 1024) {
-        setImageError("Image size must be less than 5MB");
-        setLoading(false);
-        return;
-      }
       formData.append("image", imageFile);
     }
 
@@ -149,16 +133,17 @@ export default function EventForm() {
         method: "POST",
         body: formData,
       });
+
       const data = await res.json();
+
       if (!res.ok) {
         setError(data.error || "Failed to create event");
         setLoading(false);
         return;
       }
+
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/events");
-      }, 1000);
+      setTimeout(() => router.push("/events"), 1200);
     } catch {
       setError("Network error");
       setLoading(false);
@@ -166,47 +151,37 @@ export default function EventForm() {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 800, mx: "auto" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 800, mx: "auto" }}
+    >
       <TextField
         fullWidth
         label="Title"
+        required
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        required
         margin="normal"
       />
+
       <TextField
         fullWidth
         multiline
-        rows={4}
+        rows={3}
         label="Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         margin="normal"
       />
+
+      {/* LOCATION SELECT */}
       <FormControl fullWidth required margin="normal">
-        <InputLabel id="location-label">Location</InputLabel>
+        <InputLabel>Location</InputLabel>
         <Select
-          labelId="location-label"
           value={locationType}
           onChange={(e) => handleLocationChange(e.target.value)}
           label="Location"
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 300,
-              },
-            },
-            anchorOrigin: {
-              vertical: 'bottom',
-              horizontal: 'left',
-            },
-            transformOrigin: {
-              vertical: 'top',
-              horizontal: 'left',
-            },
-            transitionDuration: 200,
-          }}
         >
           {BU_LOCATIONS.map((loc) => (
             <MenuItem key={loc} value={loc}>
@@ -215,6 +190,7 @@ export default function EventForm() {
           ))}
         </Select>
       </FormControl>
+
       {locationType === "Other" && (
         <TextField
           fullWidth
@@ -226,34 +202,35 @@ export default function EventForm() {
           }}
           required
           margin="normal"
-          sx={{ mt: 1 }}
         />
       )}
+
       <TextField
         fullWidth
         label="Start Time"
         type="datetime-local"
+        required
         value={startTime}
         onChange={(e) => setStartTime(e.target.value)}
-        required
-        margin="normal"
         InputLabelProps={{ shrink: true }}
+        margin="normal"
       />
+
       <TextField
         fullWidth
         label="End Time"
         type="datetime-local"
+        required
         value={endTime}
         onChange={(e) => setEndTime(e.target.value)}
-        required
-        margin="normal"
         InputLabelProps={{ shrink: true }}
+        margin="normal"
       />
 
-      <Box sx={{ mt: 2, mb: 2 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Event Image (Optional)
-        </Typography>
+      {/* IMAGE UPLOAD */}
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle1">Event Image (Optional)</Typography>
+
         <Button variant="outlined" component="label">
           Upload Image
           <input
@@ -263,67 +240,79 @@ export default function EventForm() {
             onChange={(e) => {
               const file = e.target.files?.[0] || null;
               setImageFile(file);
-              setImageError("");
             }}
           />
         </Button>
+
         {imageFile && (
           <Typography variant="body2" sx={{ mt: 1 }}>
             Selected: {imageFile.name}
           </Typography>
         )}
-        {imageError && (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {imageError}
-          </Alert>
-        )}
       </Box>
 
-      <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
+      <Typography variant="h6" sx={{ mt: 3 }}>
         Food Items
       </Typography>
+
       {foodItems.map((item, index) => (
-        <Box key={index} sx={{ mb: 2, p: 2, border: "1px solid #ccc", borderRadius: 1 }}>
-          <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+        <Box
+          key={index}
+          sx={{
+            border: "1px solid #ccc",
+            borderRadius: 1,
+            p: 2,
+            mt: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
               label="Food Name"
-              value={item.name}
-              onChange={(e) => updateFoodItem(index, "name", e.target.value)}
               required
+              value={item.name}
+              onChange={(e) =>
+                updateFoodItem(index, "name", e.target.value)
+              }
               sx={{ flex: 1 }}
             />
+
             <TextField
-              label="Quantity"
+              label="Qty"
               type="number"
               value={item.quantity}
               onChange={(e) =>
-                updateFoodItem(index, "quantity", parseInt(e.target.value) || 1)
+                updateFoodItem(index, "quantity", Number(e.target.value))
               }
-              required
-              sx={{ width: 120 }}
-              inputProps={{ min: 1 }}
+              sx={{ width: 100 }}
             />
+
             {foodItems.length > 1 && (
-              <IconButton onClick={() => removeFoodItem(index)} color="error">
+              <IconButton
+                onClick={() => removeFoodItem(index)}
+                color="error"
+              >
                 <DeleteIcon />
               </IconButton>
             )}
           </Box>
+
           <TextField
             fullWidth
             label="Description (optional)"
-            value={item.description}
-            onChange={(e) => updateFoodItem(index, "description", e.target.value)}
             margin="normal"
-            size="small"
+            value={item.description}
+            onChange={(e) =>
+              updateFoodItem(index, "description", e.target.value)
+            }
           />
         </Box>
       ))}
+
       <Button
         startIcon={<AddIcon />}
-        onClick={addFoodItem}
         variant="outlined"
-        sx={{ mb: 2 }}
+        sx={{ mt: 2 }}
+        onClick={addFoodItem}
       >
         Add Food Item
       </Button>
@@ -332,7 +321,7 @@ export default function EventForm() {
         type="submit"
         variant="contained"
         fullWidth
-        sx={{ mt: 2 }}
+        sx={{ mt: 4 }}
         disabled={loading}
       >
         {loading ? "Creating..." : "Create Event"}
@@ -340,7 +329,7 @@ export default function EventForm() {
 
       <Snackbar
         open={!!error}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setError("")}
       >
         <Alert severity="error">{error}</Alert>
@@ -351,7 +340,9 @@ export default function EventForm() {
         autoHideDuration={2000}
         onClose={() => setSuccess(false)}
       >
-        <Alert severity="success">Event created successfully!</Alert>
+        <Alert severity="success">
+          Event created successfully!
+        </Alert>
       </Snackbar>
     </Box>
   );

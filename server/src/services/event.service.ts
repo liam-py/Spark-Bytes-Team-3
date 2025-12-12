@@ -29,6 +29,13 @@ export const eventService = {
       createdBy: userId,
     })
 
+<<<<<<< HEAD
+    // Send notifications to users who opted in
+    notificationService.sendEventNotification(event.id, event.title).catch((err) => {
+      console.error('Failed to send notifications:', err)
+    })
+
+=======
     console.log('\n🎉 ===== EVENT CREATED =====')
     console.log('🎉 Event ID:', event.id)
     console.log('🎉 Event Title:', event.title)
@@ -46,6 +53,7 @@ export const eventService = {
     })
 
     console.log('🎉 =========================\n')
+>>>>>>> bc462f422b0c6a09b358738db66beaf94bfb33e4
     return event
   },
 

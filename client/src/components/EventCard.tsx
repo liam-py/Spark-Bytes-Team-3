@@ -18,10 +18,20 @@ export default function EventCard({ event }: { event: any }) {
     return new Date(dateString).toLocaleString();
   };
 
+  // ✅ Correct Supabase-compatible image logic
   const imageSrc = getEventImageSrc(event);
 
   return (
-    <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 2, transition: "all 0.2s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }}>
+    <Card
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: 2,
+        transition: "all 0.2s",
+        "&:hover": { boxShadow: 4, transform: "translateY(-2px)" },
+      }}
+    >
       {imageSrc && (
         <CardMedia
           component="img"
@@ -31,16 +41,20 @@ export default function EventCard({ event }: { event: any }) {
           sx={{ objectFit: "cover" }}
         />
       )}
+
       <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
           {event.title}
         </Typography>
+
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {event.location}
         </Typography>
+
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {formatDate(event.startTime)} - {formatDate(event.endTime)}
+          {formatDate(event.startTime)} – {formatDate(event.endTime)}
         </Typography>
+
         <Box sx={{ mt: 1, mb: 2, flexGrow: 1 }}>
           {event.foodItems?.length > 0 ? (
             event.foodItems.map((item: any) => (
@@ -53,11 +67,16 @@ export default function EventCard({ event }: { event: any }) {
               />
             ))
           ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontStyle: "italic" }}
+            >
               No food items listed
             </Typography>
           )}
         </Box>
+
         <Link href={`/events/${event.id}`} style={{ textDecoration: "none" }}>
           <Button variant="contained" fullWidth sx={{ mt: "auto" }}>
             View Details
