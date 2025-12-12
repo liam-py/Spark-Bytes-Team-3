@@ -68,9 +68,17 @@ export default function Navbar() {
         </Link>
 
         <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Link href="/about" style={{ textDecoration: "none" }}>
+            <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>About</Button>
+          </Link>
+
+
           <Link href="/events" style={{ textDecoration: "none" }}>
             <Button sx={{ fontWeight: "normal", fontSize: "1.2rem", color: "primary.main", "&:hover": { boxShadow: "none", backgroundColor: "inherit"} }}>Events</Button>
           </Link>
+
+
+          
 
           {/* Only show these when we have a logged-in user */}
           {user && (
