@@ -18,9 +18,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useRouter } from "next/navigation";
-import ImageUpload from "./ImageUpload";
-
-const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 const BU_LOCATIONS = [
   "CAS Building (College of Arts & Sciences)",
@@ -53,11 +50,12 @@ export default function EventForm() {
   const [customLocation, setCustomLocation] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [imagePath, setImagePath] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [foodItems, setFoodItems] = useState([
     { name: "", description: "", quantity: 1, dietaryInfo: [] as string[] },
   ]);
   const [error, setError] = useState("");
+  const [imageError, setImageError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -95,6 +93,7 @@ export default function EventForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setImageError("");
     setLoading(true);
 
     // Determine final location value
@@ -106,20 +105,49 @@ export default function EventForm() {
       return;
     }
 
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      setError("Please provide valid start and end times");
+      setLoading(false);
+      return;
+    }
+    if (endDate <= startDate) {
+      setError("End time must be after start time");
+      setLoading(false);
+      return;
+    }
+
+    // Build multipart form data
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("location", finalLocation);
+    formData.append("startTime", new Date(startTime).toISOString());
+    formData.append("endTime", new Date(endTime).toISOString());
+    formData.append(
+      "foodItems",
+      JSON.stringify(foodItems.filter((item) => item.name))
+    );
+
+    if (imageFile) {
+      if (!imageFile.type.match(/^image\//)) {
+        setImageError("Invalid image type");
+        setLoading(false);
+        return;
+      }
+      if (imageFile.size > 5 * 1024 * 1024) {
+        setImageError("Image size must be less than 5MB");
+        setLoading(false);
+        return;
+      }
+      formData.append("image", imageFile);
+    }
+
     try {
-      const res = await fetch(`${base}/api/events`, {
+      const res = await fetch("/api/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title,
-          description,
-          location: finalLocation,
-          startTime: new Date(startTime).toISOString(),
-          endTime: new Date(endTime).toISOString(),
-          imagePath: imagePath || undefined,
-          foodItems: foodItems.filter((item) => item.name),
-        }),
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -222,7 +250,34 @@ export default function EventForm() {
         InputLabelProps={{ shrink: true }}
       />
 
-      <ImageUpload onUpload={(path) => setImagePath(path)} />
+      <Box sx={{ mt: 2, mb: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Event Image (Optional)
+        </Typography>
+        <Button variant="outlined" component="label">
+          Upload Image
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setImageFile(file);
+              setImageError("");
+            }}
+          />
+        </Button>
+        {imageFile && (
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Selected: {imageFile.name}
+          </Typography>
+        )}
+        {imageError && (
+          <Alert severity="error" sx={{ mt: 1 }}>
+            {imageError}
+          </Alert>
+        )}
+      </Box>
 
       <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
         Food Items
@@ -301,4 +356,3 @@ export default function EventForm() {
     </Box>
   );
 }
-

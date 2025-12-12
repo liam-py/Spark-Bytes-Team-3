@@ -11,21 +11,22 @@ import {
   Chip,
 } from "@mui/material";
 import Link from "next/link";
-
-const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+import { getEventImageSrc } from "@/lib/eventImage";
 
 export default function EventCard({ event }: { event: any }) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
 
+  const imageSrc = getEventImageSrc(event);
+
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 2, transition: "all 0.2s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }}>
-      {event.imagePath && (
+      {imageSrc && (
         <CardMedia
           component="img"
           height="200"
-          image={`${base}${event.imagePath}`}
+          image={imageSrc}
           alt={event.title}
           sx={{ objectFit: "cover" }}
         />
@@ -66,4 +67,3 @@ export default function EventCard({ event }: { event: any }) {
     </Card>
   );
 }
-
