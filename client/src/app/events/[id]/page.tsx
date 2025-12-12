@@ -25,6 +25,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { getEventImageSrc } from "@/lib/eventImage";
 
 const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
@@ -236,15 +237,16 @@ export default function EventDetailPage() {
   const isStudent = user && user.role !== "ADMIN";
   const canEdit = isAdmin || (user && event.createdBy === user.id);
   const isEventCreator = user && event.createdBy === user.id;
+  const imageSrc = getEventImageSrc(event);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Event Image */}
-      {event.imagePath && (
+      {imageSrc && (
         <CardMedia
           component="img"
           height="400"
-          image={`${base}${event.imagePath}`}
+          image={imageSrc}
           alt={event.title}
           sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}
         />
